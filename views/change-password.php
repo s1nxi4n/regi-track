@@ -75,7 +75,6 @@ if ($isAdmin) {
                 required 
                 minlength="6"
             >
-            <p class="form-hint">Minimum 6 characters</p>
         </div>
         
         <div class="form-group">

@@ -47,7 +47,7 @@ unset($_SESSION['login_error']);
                         id="student_id" 
                         name="student_id" 
                         class="form-input" 
-                        placeholder="xx-xxxx-xxxxxx or email@phinmaed.com"
+                        placeholder="Enter student ID or email"
                         required
                         autocomplete="username"
                     >
@@ -60,7 +60,7 @@ unset($_SESSION['login_error']);
                         id="password" 
                         name="password" 
                         class="form-input" 
-                        placeholder="Enter your password"
+                        placeholder="Enter password"
                         required
                         autocomplete="current-password"
                     >

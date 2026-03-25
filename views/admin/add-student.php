@@ -49,10 +49,9 @@ unset($_SESSION['add_student_error'], $_SESSION['add_student_success']);
                 name="student_id" 
                 class="form-input font-mono" 
                 pattern="\d{2}-\d{4}-\d{6}" 
-                placeholder="00-0000-000000" 
+                placeholder="e.g. 23-1234-567890" 
                 required
             >
-            <p class="form-hint">Format: xx-xxxx-xxxxxx (numbers only)</p>
         </div>
         
         <div class="form-group">
@@ -62,7 +61,7 @@ unset($_SESSION['add_student_error'], $_SESSION['add_student_success']);
                 id="full_name" 
                 name="full_name" 
                 class="form-input" 
-                placeholder="Juan dela Cruz" 
+                placeholder="Enter full name" 
                 required
             >
         </div>
@@ -75,10 +74,9 @@ unset($_SESSION['add_student_error'], $_SESSION['add_student_success']);
                 name="email" 
                 class="form-input" 
                 pattern=".+@phinmaed\.com$" 
-                placeholder="juan.cruz.ui@phinmaed.com" 
+                placeholder="e.g. john.doe.ui@phinmaed.com" 
                 required
             >
-            <p class="form-hint">Must be a PHINMA Education email (*.ui@phinmaed.com)</p>
         </div>
         
         <div class="flex gap-4 mt-6">
