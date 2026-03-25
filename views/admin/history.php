@@ -4,7 +4,8 @@ require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_ADMIN);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
 
-$pageTitle = 'Admin Activity Log';
+$pageTitle = 'Activity Logs';
+$currentPage = 'history';
 
 $logs = getAdminLogs();
 $users = getUsers();
@@ -41,56 +42,70 @@ if ($logs) {
 usort($logsArray, function($a, $b) {
     return strcmp($b['timestamp'] ?? '', $a['timestamp'] ?? '');
 });
-
-include_once __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="container">
-    <h1>Activity Log</h1>
-    
+<?php include_once __DIR__ . '/../../includes/layout-admin.php'; ?>
+
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h2>Activity Logs</h2>
+        <p class="text-muted mb-0">Track all administrative actions</p>
+    </div>
     <?php if (!empty($logsArray)): ?>
-    <form action="../../actions/admin/clear-logs.php" method="POST" class="mb-4">
-        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Clear all?')">Clear</button>
+    <form action="../../actions/admin/clear-logs.php" method="POST">
+        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Clear all logs?')">
+            🗑️ Clear All
+        </button>
     </form>
     <?php endif; ?>
-    
-    <?php if (empty($logsArray)): ?>
-        <p>No activity yet.</p>
-    <?php else: ?>
-        <div class="log-list">
-            <?php foreach ($logsArray as $log): ?>
-            <div class="log-item" onclick="showLogDetails('<?= $log['key'] ?>')">
-                <span class="log-icon">
-                    <?php
-                    $action = strtolower($log['action'] ?? '');
-                    if (strpos($action, 'accept') !== false) echo '✅';
-                    elseif (strpos($action, 'reject') !== false) echo '❌';
-                    elseif (strpos($action, 'reschedul') !== false) echo '📅';
-                    elseif (strpos($action, 'cancel') !== false) echo '🚫';
-                    elseif (strpos($action, 'settled') !== false) echo '🎉';
-                    elseif (strpos($action, 'no-show') !== false) echo '⚠️';
-                    elseif (strpos($action, 'add') !== false) echo '👤';
-                    else echo '📋';
-                    ?>
-                </span>
-                <span class="log-text">
-                    <strong><?= htmlspecialchars($log['action'] ?? '') ?></strong> · <?= htmlspecialchars($log['details'] ?? '') ?>
-                </span>
-                <span class="log-time"><?= htmlspecialchars(date('M d, g:i A', strtotime($log['timestamp'] ?? ''))) ?></span>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
-    
-    <a href="dashboard.php" class="btn btn-secondary mt-4">Back</a>
 </div>
 
-<div id="logDetailModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeModal('logDetailModal')">&times;</span>
-        <h2>Log Details</h2>
-        <div id="logDetailContent"></div>
-        <button type="button" class="btn btn-secondary" onclick="closeModal('logDetailModal')">Close</button>
+<?php if (empty($logsArray)): ?>
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-icon">📜</div>
+        <h3 class="empty-title">No Activity</h3>
+        <p class="empty-text">Admin actions will appear here once recorded.</p>
+    </div>
+</div>
+<?php else: ?>
+<div class="log-list stagger">
+    <?php foreach ($logsArray as $log): ?>
+    <div class="log-item" onclick="showLogDetails('<?= $log['key'] ?>')">
+        <?php
+        $action = strtolower($log['action'] ?? '');
+        $iconClass = '';
+        $icon = '📋';
+        
+        if (strpos($action, 'accept') !== false) { $icon = '✅'; $iconClass = 'accept'; }
+        elseif (strpos($action, 'reject') !== false) { $icon = '❌'; $iconClass = 'reject'; }
+        elseif (strpos($action, 'reschedul') !== false) { $icon = '📅'; $iconClass = 'reschedule'; }
+        elseif (strpos($action, 'cancel') !== false) { $icon = '🚫'; $iconClass = 'cancel'; }
+        elseif (strpos($action, 'settled') !== false) { $icon = '🎉'; $iconClass = 'settle'; }
+        elseif (strpos($action, 'no-show') !== false) { $icon = '⚠️'; $iconClass = 'cancel'; }
+        elseif (strpos($action, 'add') !== false) { $icon = '👤'; $iconClass = 'accept'; }
+        ?>
+        <div class="log-icon <?= $iconClass ?>"><?= $icon ?></div>
+        <div class="log-content">
+            <div class="log-action"><?= htmlspecialchars($log['action'] ?? '') ?></div>
+            <div class="log-details"><?= htmlspecialchars($log['details'] ?? '') ?></div>
+        </div>
+        <div class="log-time"><?= htmlspecialchars(date('M d, g:i A', strtotime($log['timestamp'] ?? ''))) ?></div>
+    </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
+
+<div id="logDetailModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Log Details</h3>
+            <button type="button" class="modal-close" onclick="document.getElementById('logDetailModal').classList.remove('active')">&times;</button>
+        </div>
+        <div class="modal-body" id="logDetailContent"></div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('logDetailModal').classList.remove('active')">Close</button>
+        </div>
     </div>
 </div>
 
@@ -116,18 +131,25 @@ function showLogDetails(key) {
     const log = logData[key];
     if (!log) return;
     
-    let html = '<div class="details-box">';
-    html += '<p><strong>Action:</strong> ' + (log.action || 'N/A') + '</p>';
-    html += '<p><strong>Student:</strong> ' + (log.student_name || 'N/A') + '</p>';
-    html += '<p><strong>Request Type:</strong> ' + (log.appointment_type || 'N/A') + '</p>';
-    html += '<p><strong>Details:</strong> ' + (log.details || 'N/A') + '</p>';
-    html += '<p><strong>Admin:</strong> ' + (log.admin_id || 'N/A') + '</p>';
-    html += '<p><strong>Timestamp:</strong> ' + (log.timestamp || 'N/A') + '</p>';
-    html += '</div>';
+    let html = '<div class="table-container">';
+    html += '<table>';
+    html += '<tr><th>Action</th><td>' + (log.action || 'N/A') + '</td></tr>';
+    html += '<tr><th>Student</th><td>' + (log.student_name || 'N/A') + '</td></tr>';
+    html += '<tr><th>Request Type</th><td>' + (log.appointment_type || 'N/A') + '</td></tr>';
+    html += '<tr><th>Details</th><td>' + (log.details || 'N/A') + '</td></tr>';
+    html += '<tr><th>Admin</th><td>' + (log.admin_id || 'N/A') + '</td></tr>';
+    html += '<tr><th>Timestamp</th><td>' + (log.timestamp || 'N/A') + '</td></tr>';
+    html += '</table></div>';
     
     document.getElementById('logDetailContent').innerHTML = html;
-    openModal('logDetailModal');
+    document.getElementById('logDetailModal').classList.add('active');
 }
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.getElementById('logDetailModal').classList.remove('active');
+    }
+});
 </script>
 
-<?php include_once __DIR__ . '/../../includes/footer.php'; ?>
+<?php include_once __DIR__ . '/../../includes/layout-end.php'; ?>
