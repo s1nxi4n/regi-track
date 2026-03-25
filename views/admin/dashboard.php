@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../../config/constants.php';
-require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_ADMIN);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
@@ -13,11 +12,14 @@ $today = date('Y-m-d');
 $todayScheduled = [];
 $futureScheduled = [];
 $pendingAppointments = [];
+$rescheduleRequests = [];
 
 foreach ($appointments as $id => $apt) {
     $apt['id'] = $id;
     
-    if ($apt['status'] === STATUS_PENDING) {
+    if ($apt['status'] === STATUS_PENDING && !empty($apt['rescheduled_date'])) {
+        $rescheduleRequests[$id] = $apt;
+    } elseif ($apt['status'] === STATUS_PENDING) {
         $pendingAppointments[$id] = $apt;
     } elseif ($apt['status'] === STATUS_SCHEDULED) {
         if ($apt['date'] === $today) {
@@ -35,6 +37,7 @@ function sortByDate($a, $b) {
 usort($todayScheduled, 'sortByDate');
 usort($futureScheduled, 'sortByDate');
 usort($pendingAppointments, 'sortByDate');
+usort($rescheduleRequests, 'sortByDate');
 
 include_once __DIR__ . '/../../includes/header.php';
 ?>
@@ -105,6 +108,29 @@ include_once __DIR__ . '/../../includes/header.php';
             </table>
         <?php endif; ?>
     </div>
+    
+    <?php if (!empty($rescheduleRequests)): ?>
+    <div class="card" style="margin-top: 1.5rem;">
+        <h3>Reschedule Requests (<?= count($rescheduleRequests) ?>)</h3>
+        <table>
+            <tr><th>Student</th><th>Type</th><th>Current Date</th><th>Requested Date</th><th>Reason</th><th>Actions</th></tr>
+            <?php foreach ($rescheduleRequests as $apt): ?>
+            <tr>
+                <td><?= htmlspecialchars($apt['student_id']) ?></td>
+                <td><?= htmlspecialchars($APPOINTMENT_TYPES[$apt['type']]['label'] ?? $apt['type']) ?></td>
+                <td><?= htmlspecialchars($apt['date']) ?></td>
+                <td><?= htmlspecialchars($apt['rescheduled_date']) ?></td>
+                <td><?= htmlspecialchars($apt['reschedule_reason'] ?? 'N/A') ?></td>
+                <td>
+                    <div class="actions">
+                        <a href="manage-appointment.php?id=<?= $apt['id'] ?>" class="btn btn-primary">Review</a>
+                    </div>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+    </div>
+    <?php endif; ?>
 </div>
 
 <?php include_once __DIR__ . '/../../includes/footer.php'; ?>

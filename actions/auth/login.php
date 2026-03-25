@@ -19,6 +19,7 @@ if ($studentId === 'admin') {
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['student_id'] = 'admin';
         $_SESSION['role'] = ROLE_ADMIN;
+        $_SESSION['full_name'] = $user['full_name'] ?? 'Administrator';
         header('Location: ../../views/admin/dashboard.php');
         exit;
     }
@@ -27,6 +28,7 @@ if ($studentId === 'admin') {
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['student_id'] = $studentId;
         $_SESSION['role'] = $user['role'];
+        $_SESSION['full_name'] = $user['full_name'] ?? $studentId;
         
         if ($user['is_first_login']) {
             header('Location: ../../views/change-password.php');

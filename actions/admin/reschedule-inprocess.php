@@ -6,10 +6,17 @@ requireOnceRole(ROLE_ADMIN);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
 
 $id = $_POST['id'] ?? '';
+$scheduledDate = $_POST['scheduled_date'] ?? '';
 $reason = trim($_POST['reason'] ?? '');
 
+if (empty($scheduledDate)) {
+    $_SESSION['manage_error'] = 'Please select a pickup date.';
+    header('Location: ../../views/admin/manage-appointment.php?id=' . $id);
+    exit;
+}
+
 if (empty($reason)) {
-    $_SESSION['manage_error'] = 'Rejection reason is required.';
+    $_SESSION['manage_error'] = 'Please provide a reason for reschedule.';
     header('Location: ../../views/admin/manage-appointment.php?id=' . $id);
     exit;
 }
@@ -21,17 +28,13 @@ if (!$appointment) {
     exit;
 }
 
-$studentId = $appointment['student_id'];
-
 updateAppointment($id, [
-    'status' => STATUS_REJECTED,
-    'rejection_reason' => $reason
+    'date' => $scheduledDate,
+    'rescheduled_by_admin' => $reason
 ]);
 
-createNotification($studentId, $id, 'rejected', 'Your appointment has been rejected. Reason: ' . $reason);
+logAdminAction($_SESSION['student_id'], 'Rescheduled in-process appointment', $id, 'New date: ' . $scheduledDate . ', Reason: ' . $reason);
 
-logAdminAction($_SESSION['student_id'], 'Rejected appointment', $id, 'Reason: ' . $reason);
-
-$_SESSION['manage_success'] = 'Appointment rejected.';
+$_SESSION['manage_success'] = 'Appointment rescheduled to ' . htmlspecialchars($scheduledDate);
 header('Location: ../../views/admin/manage-appointment.php?id=' . $id);
 exit;

@@ -3,7 +3,6 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_ADMIN);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
-require_once __DIR__ . '/../../config/constants.php';
 
 $pageTitle = 'Add Student - RegiTrack';
 
@@ -32,6 +31,20 @@ include_once __DIR__ . '/../../includes/header.php';
                    pattern="\d{2}-\d{4}-\d{6}" 
                    placeholder="00-0000-000000" required>
             <small>Format: xx-xxxx-xxxxxx (numbers only)</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name" 
+                   placeholder="Juan dela Cruz" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" 
+                   pattern=".+@phinmaed\.com$" 
+                   placeholder="juan.cruz.ui@phinmaed.com" required>
+            <small>Format: *.ui@phinmaed.com</small>
         </div>
         
         <button type="submit">Add Student</button>

@@ -3,7 +3,6 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_STUDENT);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
-require_once __DIR__ . '/../../config/constants.php';
 
 $pageTitle = 'View Appointment - RegiTrack';
 
@@ -43,9 +42,27 @@ include_once __DIR__ . '/../../includes/header.php';
         </div>
         <?php endif; ?>
         
+        <?php if (!empty($appointment['cancellation_reason'])): ?>
+        <div class="error">
+            <strong>Cancellation Reason:</strong> <?= htmlspecialchars($appointment['cancellation_reason']) ?>
+        </div>
+        <?php endif; ?>
+        
         <?php if (!empty($appointment['rescheduled_date'])): ?>
         <div class="success">
             <strong>Rescheduled Date:</strong> <?= htmlspecialchars($appointment['rescheduled_date']) ?>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($appointment['reschedule_reason'])): ?>
+        <div class="details-box">
+            <strong>Your Reschedule Reason:</strong> <?= htmlspecialchars($appointment['reschedule_reason']) ?>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($appointment['admin_reschedule_reason'])): ?>
+        <div class="details-box">
+            <strong>Rescheduled by Admin:</strong> <?= htmlspecialchars($appointment['admin_reschedule_reason']) ?>
         </div>
         <?php endif; ?>
     </div>

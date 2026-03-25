@@ -43,12 +43,14 @@ function getUser($studentId) {
     return $users[$studentId] ?? null;
 }
 
-function createUser($studentId, $password, $role = ROLE_STUDENT) {
+function createUser($studentId, $password, $role = ROLE_STUDENT, $fullName = '', $email = '') {
     return firebaseRequest(USERS_PATH . '/' . $studentId, 'PUT', [
         'student_id' => $studentId,
         'password' => password_hash($password, PASSWORD_DEFAULT),
         'is_first_login' => true,
-        'role' => $role
+        'role' => $role,
+        'full_name' => $fullName,
+        'email' => $email
     ]);
 }
 
@@ -102,4 +104,43 @@ function logAdminAction($adminId, $action, $appointmentId, $details = '') {
 
 function getAdminLogs() {
     return firebaseRequest(ADMIN_LOGS_PATH) ?? [];
+}
+
+function createNotification($studentId, $appointmentId, $type, $message) {
+    $id = uniqid('notif_');
+    return firebaseRequest(NOTIFICATIONS_PATH . '/' . $studentId . '/' . $id, 'PUT', [
+        'appointment_id' => $appointmentId,
+        'type' => $type,
+        'message' => $message,
+        'is_read' => false,
+        'created_at' => date('Y-m-d H:i:s')
+    ]);
+}
+
+function getNotifications($studentId) {
+    return firebaseRequest(NOTIFICATIONS_PATH . '/' . $studentId) ?? [];
+}
+
+function markNotificationRead($studentId, $notificationId) {
+    return firebaseRequest(NOTIFICATIONS_PATH . '/' . $studentId . '/' . $notificationId, 'PATCH', ['is_read' => true]);
+}
+
+function markAllNotificationsRead($studentId) {
+    $notifications = getNotifications($studentId);
+    foreach ($notifications as $id => $notif) {
+        if (empty($notif['is_read'])) {
+            firebaseRequest(NOTIFICATIONS_PATH . '/' . $studentId . '/' . $id, 'PATCH', ['is_read' => true]);
+        }
+    }
+}
+
+function getUnreadNotificationCount($studentId) {
+    $notifications = getNotifications($studentId);
+    $count = 0;
+    foreach ($notifications as $notif) {
+        if (empty($notif['is_read'])) {
+            $count++;
+        }
+    }
+    return $count;
 }

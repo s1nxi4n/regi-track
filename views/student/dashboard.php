@@ -29,11 +29,10 @@ include_once __DIR__ . '/../../includes/header.php';
 ?>
 
 <div class="container">
-    <h1>Welcome, <?= htmlspecialchars($studentId) ?></h1>
+    <h1>Welcome, <?= htmlspecialchars($_SESSION['full_name'] ?? $studentId) ?></h1>
     
     <div class="actions-bar">
         <a href="create-appointment.php" class="btn btn-primary">+ New Appointment</a>
-        <a href="history.php" class="btn btn-secondary">View History</a>
     </div>
     
     <h2>Active Appointments</h2>

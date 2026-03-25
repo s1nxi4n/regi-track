@@ -9,7 +9,7 @@ $id = $_POST['id'] ?? '';
 $reason = trim($_POST['reason'] ?? '');
 
 if (empty($reason)) {
-    $_SESSION['manage_error'] = 'Rejection reason is required.';
+    $_SESSION['manage_error'] = 'Please provide a cancellation reason.';
     header('Location: ../../views/admin/manage-appointment.php?id=' . $id);
     exit;
 }
@@ -24,14 +24,14 @@ if (!$appointment) {
 $studentId = $appointment['student_id'];
 
 updateAppointment($id, [
-    'status' => STATUS_REJECTED,
-    'rejection_reason' => $reason
+    'status' => STATUS_CANCELLED,
+    'cancellation_reason' => $reason
 ]);
 
-createNotification($studentId, $id, 'rejected', 'Your appointment has been rejected. Reason: ' . $reason);
+createNotification($studentId, $id, 'cancelled', 'Your appointment has been cancelled. Reason: ' . $reason);
 
-logAdminAction($_SESSION['student_id'], 'Rejected appointment', $id, 'Reason: ' . $reason);
+logAdminAction($_SESSION['student_id'], 'Cancelled appointment', $id, 'Reason: ' . $reason);
 
-$_SESSION['manage_success'] = 'Appointment rejected.';
-header('Location: ../../views/admin/manage-appointment.php?id=' . $id);
+$_SESSION['manage_success'] = 'Appointment cancelled.';
+header('Location: ../../views/admin/dashboard.php');
 exit;

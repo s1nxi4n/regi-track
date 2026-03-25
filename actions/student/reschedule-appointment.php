@@ -4,10 +4,10 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_STUDENT);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
-require_once __DIR__ . '/../../config/constants.php';
 
 $id = $_POST['id'] ?? '';
 $newDate = $_POST['new_date'] ?? '';
+$reason = trim($_POST['reason'] ?? '');
 
 $appointment = getAppointment($id);
 
@@ -27,8 +27,16 @@ if (empty($newDate)) {
     exit;
 }
 
+if (empty($reason)) {
+    $_SESSION['reschedule_error'] = 'Please provide a reason for reschedule.';
+    header('Location: ../../views/student/reschedule-appointment.php?id=' . $id);
+    exit;
+}
+
 updateAppointment($id, [
     'rescheduled_date' => $newDate,
+    'reschedule_reason' => $reason,
+    'admin_reschedule_reason' => '',
     'status' => STATUS_PENDING
 ]);
 

@@ -4,7 +4,6 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_ADMIN);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
-require_once __DIR__ . '/../../config/constants.php';
 
 $id = $_POST['id'] ?? '';
 $appointment = getAppointment($id);
@@ -14,10 +13,15 @@ if (!$appointment) {
     exit;
 }
 
+$studentId = $appointment['student_id'];
+
 updateAppointment($id, [
     'rescheduled_date' => '',
-    'status' => STATUS_IN_PROCESS
+    'reschedule_reason' => '',
+    'status' => STATUS_SCHEDULED
 ]);
+
+createNotification($studentId, $id, 'reschedule_rejected', 'Your reschedule request has been denied. Your original date is retained.');
 
 logAdminAction($_SESSION['student_id'], 'Rejected reschedule', $id, 'Reschedule request denied');
 

@@ -26,6 +26,12 @@ include_once __DIR__ . '/../../includes/header.php';
 <div class="container">
     <h1>Admin Action Logs</h1>
     
+    <?php if (!empty($logsArray)): ?>
+    <form action="../../actions/admin/clear-logs.php" method="POST" style="margin-bottom: 1rem;">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Clear ALL admin logs? This cannot be undone.')">Clear All Logs</button>
+    </form>
+    <?php endif; ?>
+    
     <?php if (empty($logsArray)): ?>
         <p>No admin actions recorded yet.</p>
     <?php else: ?>

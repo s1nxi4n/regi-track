@@ -3,7 +3,6 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_STUDENT);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
-require_once __DIR__ . '/../../config/constants.php';
 
 $pageTitle = 'Reschedule Appointment - RegiTrack';
 
@@ -44,6 +43,11 @@ include_once __DIR__ . '/../../includes/header.php';
         <div class="form-group">
             <label for="new_date">New Preferred Date</label>
             <input type="date" id="new_date" name="new_date" required min="<?= date('Y-m-d') ?>">
+        </div>
+        
+        <div class="form-group">
+            <label for="reason">Reason for Reschedule</label>
+            <textarea id="reason" name="reason" required></textarea>
         </div>
         
         <button type="submit">Request Reschedule</button>

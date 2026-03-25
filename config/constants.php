@@ -37,3 +37,4 @@ $APPOINTMENT_TYPES = [
 ];
 
 define('STUDENT_ID_FORMAT', '/^\d{2}-\d{4}-\d{6}$/');
+define('EMAIL_FORMAT', '/^.+\.ui@phinmaed\.com$/');

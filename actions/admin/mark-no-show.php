@@ -4,7 +4,6 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_ADMIN);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
-require_once __DIR__ . '/../../config/constants.php';
 
 $id = $_POST['id'] ?? '';
 $appointment = getAppointment($id);
@@ -14,7 +13,11 @@ if (!$appointment) {
     exit;
 }
 
+$studentId = $appointment['student_id'];
+
 updateAppointment($id, ['status' => STATUS_NO_SHOW]);
+
+createNotification($studentId, $id, 'no_show', 'You did not show up for your appointment. Please contact the registrar.');
 
 logAdminAction($_SESSION['student_id'], 'Marked no-show', $id, 'Student did not arrive');
 

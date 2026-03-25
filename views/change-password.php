@@ -42,6 +42,7 @@ $pageTitle = 'Change Password - RegiTrack';
             </div>
             
             <button type="submit">Change Password</button>
+            <a href="<?= $_SESSION['role'] === ROLE_ADMIN ? '/views/admin/dashboard.php' : '/views/student/dashboard.php' ?>" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 </body>

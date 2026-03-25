@@ -6,3 +6,4 @@ define('FIREBASE_SECRET', 'xhk4DuJfZccA05IDLga5hQZvhx2YJkSVPRkVTTMl');
 define('USERS_PATH', '/users');
 define('APPOINTMENTS_PATH', '/appointments');
 define('ADMIN_LOGS_PATH', '/admin_logs');
+define('NOTIFICATIONS_PATH', '/notifications');
