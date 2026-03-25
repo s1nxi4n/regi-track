@@ -47,7 +47,7 @@ if ($isAdmin) {
     </div>
 <?php endif; ?>
 
-<div class="card" style="max-width: 500px; <?= $isAdmin ? 'margin: 0 auto;' : '' ?>">
+<div class="card" style="max-width: 500px; margin: 0 auto;">
     <div class="card-header">
         <div class="flex items-center gap-3">
             <div class="stat-icon" style="width:40px;height:40px;background:var(--accent-dim);color:var(--accent);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;">

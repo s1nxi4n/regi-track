@@ -623,6 +623,15 @@ tr:hover td {
   background: var(--bg-tertiary);
 }
 
+.clickable-row {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.clickable-row:hover td {
+  background: var(--bg-hover);
+}
+
 /* ===== Status Badges ===== */
 .status-badge {
   display: inline-flex;

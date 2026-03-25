@@ -102,7 +102,7 @@ $activeTab = $_GET['tab'] ?? 'today';
         <div class="card-header">
             <div>
                 <h3 class="card-title">Today's Schedule</h3>
-                <p class="card-subtitle"><?= count($todayScheduled) ?> appointment(s) for today</p>
+                <p class="card-subtitle"><?= count($todayScheduled) ?> appointment(s) for today - Click to manage</p>
             </div>
         </div>
         <div class="table-container">
@@ -113,12 +113,11 @@ $activeTab = $_GET['tab'] ?? 'today';
                         <th>Type</th>
                         <th>Date</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($todayScheduled as $apt): ?>
-                    <tr>
+                    <tr class="clickable-row" onclick="window.location='manage-appointment.php?id=<?= $apt['id'] ?>'">
                         <td>
                             <div class="flex items-center gap-3">
                                 <div class="user-avatar" style="width:32px;height:32px;font-size:12px;">
@@ -130,9 +129,6 @@ $activeTab = $_GET['tab'] ?? 'today';
                         <td><?= htmlspecialchars($APPOINTMENT_TYPES[$apt['type']]['label'] ?? $apt['type']) ?></td>
                         <td><?= htmlspecialchars($apt['date']) ?></td>
                         <td><span class="status-badge status-scheduled"><?= htmlspecialchars($apt['status']) ?></span></td>
-                        <td>
-                            <a href="manage-appointment.php?id=<?= $apt['id'] ?>" class="btn btn-primary btn-sm">Manage</a>
-                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -156,7 +152,7 @@ $activeTab = $_GET['tab'] ?? 'today';
         <div class="card-header">
             <div>
                 <h3 class="card-title">Upcoming Appointments</h3>
-                <p class="card-subtitle"><?= count($futureScheduled) ?> scheduled for future dates</p>
+                <p class="card-subtitle"><?= count($futureScheduled) ?> scheduled for future dates - Click to manage</p>
             </div>
         </div>
         <div class="table-container">
@@ -167,19 +163,15 @@ $activeTab = $_GET['tab'] ?? 'today';
                         <th>Type</th>
                         <th>Date</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($futureScheduled as $apt): ?>
-                    <tr>
+                    <tr class="clickable-row" onclick="window.location='manage-appointment.php?id=<?= $apt['id'] ?>'">
                         <td><?= htmlspecialchars($apt['student_id']) ?></td>
                         <td><?= htmlspecialchars($APPOINTMENT_TYPES[$apt['type']]['label'] ?? $apt['type']) ?></td>
                         <td><?= htmlspecialchars($apt['date']) ?></td>
                         <td><span class="status-badge status-scheduled"><?= htmlspecialchars($apt['status']) ?></span></td>
-                        <td>
-                            <a href="manage-appointment.php?id=<?= $apt['id'] ?>" class="btn btn-secondary btn-sm">Manage</a>
-                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -203,7 +195,7 @@ $activeTab = $_GET['tab'] ?? 'today';
         <div class="card-header">
             <div>
                 <h3 class="card-title">Pending Requests</h3>
-                <p class="card-subtitle"><?= count($pendingAppointments) ?> appointment(s) awaiting review</p>
+                <p class="card-subtitle"><?= count($pendingAppointments) ?> appointment(s) awaiting review - Click to manage</p>
             </div>
         </div>
         <div class="table-container">
@@ -214,19 +206,15 @@ $activeTab = $_GET['tab'] ?? 'today';
                         <th>Type</th>
                         <th>Date</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($pendingAppointments as $apt): ?>
-                    <tr>
+                    <tr class="clickable-row" onclick="window.location='manage-appointment.php?id=<?= $apt['id'] ?>'">
                         <td><?= htmlspecialchars($apt['student_id']) ?></td>
                         <td><?= htmlspecialchars($APPOINTMENT_TYPES[$apt['type']]['label'] ?? $apt['type']) ?></td>
                         <td><?= htmlspecialchars($apt['date']) ?></td>
                         <td><span class="status-badge status-pending"><?= htmlspecialchars($apt['status']) ?></span></td>
-                        <td>
-                            <a href="manage-appointment.php?id=<?= $apt['id'] ?>" class="btn btn-primary btn-sm">Review</a>
-                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -250,7 +238,7 @@ $activeTab = $_GET['tab'] ?? 'today';
         <div class="card-header">
             <div>
                 <h3 class="card-title">Reschedule Requests</h3>
-                <p class="card-subtitle"><?= count($rescheduleRequests) ?> appointment(s) requesting date change</p>
+                <p class="card-subtitle"><?= count($rescheduleRequests) ?> appointment(s) requesting date change - Click to manage</p>
             </div>
         </div>
         <div class="table-container">
@@ -262,20 +250,16 @@ $activeTab = $_GET['tab'] ?? 'today';
                         <th>Current Date</th>
                         <th>Requested Date</th>
                         <th>Reason</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($rescheduleRequests as $apt): ?>
-                    <tr>
+                    <tr class="clickable-row" onclick="window.location='manage-appointment.php?id=<?= $apt['id'] ?>'">
                         <td><?= htmlspecialchars($apt['student_id']) ?></td>
                         <td><?= htmlspecialchars($APPOINTMENT_TYPES[$apt['type']]['label'] ?? $apt['type']) ?></td>
                         <td><?= htmlspecialchars($apt['date']) ?></td>
                         <td><?= htmlspecialchars($apt['rescheduled_date']) ?></td>
                         <td><?= htmlspecialchars($apt['reschedule_reason'] ?? 'N/A') ?></td>
-                        <td>
-                            <a href="manage-appointment.php?id=<?= $apt['id'] ?>" class="btn btn-primary btn-sm">Review</a>
-                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
