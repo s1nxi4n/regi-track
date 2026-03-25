@@ -1,284 +1,891 @@
-# RegiTrack - Appointment Tracking System
+# RegiTrack - Complete Codebase Architecture Guide
 
-A PHP + Firebase-based appointment tracking system for PHINMA Education.
-
----
-
-## Overview
-
-RegiTrack is a web-based system that allows students to request documents (TOR, Diploma, Request RF, Certificate) and enables administrators to manage these appointments through a centralized dashboard.
+This document provides an exhaustive analysis of the RegiTrack system, from the highest-level architecture down to the smallest functions. Use this to understand every detail of how the system works.
 
 ---
 
-## Tech Stack
+## Table of Contents
 
-- **Backend:** PHP (procedural/simple OOP)
-- **Database:** Firebase Realtime Database (REST API)
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript
-- **No frameworks** - Pure PHP only
+1. [Project Overview](#1-project-overview)
+2. [Directory & File Structure](#2-directory--file-structure)
+3. [Module & Class Analysis](#3-module--class-analysis)
+4. [Function & Method Analysis](#4-function--method-analysis)
+5. [Data Flow & Dependencies](#5-data-flow--dependencies)
+6. [Execution Flow](#6-execution-flow)
 
 ---
 
-## File Structure
+## 1. Project Overview
+
+### 1.1 Technology Stack
+
+| Layer | Technology |
+|-------|-------------|
+| **Backend** | PHP (pure, no frameworks) |
+| **Database** | Firebase Realtime Database (REST API) |
+| **Frontend** | HTML5, CSS3, Vanilla JavaScript |
+| **Styling** | Custom CSS with CSS variables |
+| **Icons** | Inline SVG |
+| **Password Hashing** | PHP `password_hash()` / `password_verify()` |
+
+### 1.2 Architecture Style
+
+- **Monolithic** - All code in single PHP application
+- **Layered** - Clear separation: Config → Includes → Actions → Views
+- **MVC-lite** - Actions act as Controllers, Views as Templates, Firebase as Model
+
+### 1.3 System Purpose
+
+RegiTrack is a document appointment tracking system for PHINMA Education that allows students to request documents (TOR, Diploma, Request RF, Certificates) and enables administrators to manage these appointments.
+
+---
+
+## 2. Directory & File Structure
+
+### 2.1 Root Directory Overview
 
 ```
 /home/xian/Documents/final/
-├── config/
-│   ├── constants.php      # Roles, statuses, appointment types
-│   └── firebase.php       # Firebase URL and secret
-├── includes/
-│   ├── icon.php           # SVG icon system
-│   ├── icon.php          # Firebase CRUD operations
-│   ├── auth-check.php    # Session/role verification
-│   ├── layout-admin.php  # Admin sidebar layout
-│   ├── layout-student.php # Student sidebar layout
-│   └── layout-end.php    # Close layout tags
-├── actions/
-│   ├── auth/             # login, logout, change-password
-│   ├── student/           # create, edit, cancel, reschedule
-│   └── admin/             # add-student, accept, reject, schedule, etc.
-├── views/
-│   ├── login.php         # Student login
-│   ├── admin/login.php   # Admin login
-│   ├── change-password.php
-│   ├── student/          # dashboard, create, edit, view, notifications, history
-│   └── admin/            # dashboard, add-student, manage-appointment, history
-├── assets/
-│   ├── css/style.css    # Design system (dark theme)
-│   └── js/main.js        # Dynamic form fields, modals
-├── index.php             # Root redirect
-├── seed.php              # Creates admin account
-└── busy-seed.php         # Creates test data
+├── config/                      # System configuration
+├── includes/                   # Shared resources & helpers
+├── actions/                    # Form handlers (POST endpoints)
+├── views/                      # Page templates (GET endpoints)
+├── assets/                     # Static files (CSS, JS)
+├── index.php                   # Root entry point
+├── seed-admin.php              # Create admin account
+├── seed-busy.php               # Create test data
+└── README.md                   # This documentation
 ```
 
----
+### 2.2 Config Module (`config/`)
 
-## User Roles
+| File | Purpose |
+|------|---------|
+| `constants.php` | System-wide constants (roles, statuses, appointment types, status ordering) |
+| `firebase.php` | Firebase URL and authentication secret |
 
-### 1. Student
-- Create, edit, cancel, reschedule appointments
-- View notifications
-- View history
-- Change password (first-time login)
+**Key Constants in `constants.php`:**
 
-### 2. Admin
-- Add new students
-- Accept/reject appointments
-- Schedule appointments
-- Reschedule/cancel appointments
-- Mark as settled/no-show
-- View activity logs
-- Change password
+```php
+// Roles
+ROLE_ADMIN = 'admin'
+ROLE_STUDENT = 'student'
 
----
+// Appointment Statuses
+STATUS_PENDING = 'Pending'
+STATUS_SCHEDULED = 'Scheduled'
+STATUS_SETTLED = 'Settled'
+STATUS_NO_SHOW = 'No-Show'
+STATUS_REJECTED = 'Rejected'
+STATUS_CANCELLED = 'Cancelled'
 
-## Appointment Flow
+// Status Display Order (for sorting)
+STATUS_ORDER = [
+    'Scheduled' => 1,
+    'In Process' => 2,
+    'Pending' => 3
+]
 
+// Appointment Types with Labels and Fields
+$APPOINTMENT_TYPES = [
+    'tor' => ['label' => 'Transcript of Records (TOR)', 'fields' => [...]],
+    'diploma' => ['label' => 'Diploma', 'fields' => [...]],
+    'request_rf' => ['label' => 'Request RF', 'fields' => [...]],
+    'certificate' => ['label' => 'Certificate', 'fields' => [...]]
+]
 ```
-Student submits request (Pending)
-        ↓
-Admin reviews → Accept or Reject
-        ↓
-If Accepted → Admin schedules date (Scheduled)
-        ↓
-Student picks up → Admin marks as Settled
+
+### 2.3 Includes Module (`includes/`)
+
+| File | Purpose |
+|------|---------|
+| `icon.php` | SVG icon helper function |
+| `firebase-helper.php` | All Firebase CRUD operations |
+| `auth-check.php` | Session and role verification |
+| `layout-admin.php` | Admin layout template (sidebar, header) |
+| `layout-student.php` | Student layout template (sidebar, header) |
+| `layout-end.php` | Closing tags for layouts |
+| `header.php` | Legacy header (unused in new UI) |
+| `footer.php` | Legacy footer (unused in new UI) |
+
+### 2.4 Actions Module (`actions/`)
+
+**Auth Actions (`actions/auth/`):**
+| File | HTTP Method | Purpose |
+|------|-------------|---------|
+| `login.php` | POST | Process login credentials, create session |
+| `logout.php` | POST | Destroy session, redirect to login |
+| `change-password.php` | POST | Validate and update password |
+
+**Student Actions (`actions/student/`):**
+| File | HTTP Method | Purpose |
+|------|-------------|---------|
+| `create-appointment.php` | POST | Create new appointment |
+| `edit-appointment.php` | POST | Update existing appointment |
+| `cancel-appointment.php` | POST | Cancel appointment with reason |
+| `reschedule-appointment.php` | POST | Request date change |
+| `clear-notifications.php` | POST | Delete all notifications |
+| `clear-history.php` | POST | Remove items from history |
+
+**Admin Actions (`actions/admin/`):**
+| File | HTTP Method | Purpose |
+|------|-------------|---------|
+| `add-student.php` | POST | Create new student account |
+| `accept-appointment.php` | POST | Accept and schedule appointment |
+| `reject-appointment.php` | POST | Reject with reason |
+| `accept-reschedule.php` | POST | Approve date change |
+| `reject-reschedule.php` | POST | Deny date change |
+| `admin-reschedule.php` | POST | Admin changes date |
+| `mark-settled.php` | POST | Mark as completed |
+| `mark-no-show.php` | POST | Mark as no-show |
+| `cancel-appointment.php` | POST | Admin cancels appointment |
+| `clear-logs.php` | POST | Clear activity logs |
+| `schedule-appointment.php` | POST | Set schedule date |
+| `reschedule-inprocess.php` | POST | Legacy action |
+
+### 2.5 Views Module (`views/`)
+
+**Login Views:**
+| File | Purpose |
+|------|---------|
+| `login.php` | Student login page |
+| `admin/login.php` | Admin login page |
+
+**Shared Views:**
+| File | Purpose |
+|------|---------|
+| `change-password.php` | Password change page (works for both roles) |
+
+**Admin Views (`views/admin/`):**
+| File | Purpose |
+|------|---------|
+| `dashboard.php` | Main admin dashboard with tabs |
+| `add-student.php` | Add student form |
+| `manage-appointment.php` | View/manage single appointment |
+| `history.php` | Activity logs |
+
+**Student Views (`views/student/`):**
+| File | Purpose |
+|------|---------|
+| `dashboard.php` | Student dashboard with appointments |
+| `create-appointment.php` | New appointment form |
+| `edit-appointment.php` | Edit appointment form |
+| `view-appointment.php` | View appointment details |
+| `reschedule-appointment.php` | Request reschedule form |
+| `notifications.php` | Notification list |
+| `history.php` | Completed appointments |
+
+### 2.6 Assets Module (`assets/`)
+
+| File | Purpose |
+|------|---------|
+| `css/style.css` | Complete design system (all styles) |
+| `js/main.js` | Dynamic form fields, modal handling |
+
+### 2.7 Entry Points
+
+| File | Purpose |
+|------|---------|
+| `index.php` | Root URL handler - redirects based on auth status |
+| `views/login.php` | Student login entry |
+| `views/admin/login.php` | Admin login entry |
+
+---
+
+## 3. Module & Class Analysis
+
+### 3.1 Config Module
+
+**Purpose:** Centralized system configuration
+
+**Components:**
+- `constants.php` - Defines all system constants
+- `firebase.php` - Stores credentials
+
+**Relationships:**
+- Required by all other PHP files via `require_once`
+- No dependencies on other modules
+
+### 3.2 Database Module (`includes/firebase-helper.php`)
+
+**Purpose:** All Firebase CRUD operations - central data layer
+
+**Key Functions:**
+```php
+// User Operations
+getUsers()                      // GET /users.json - Get all users
+getUser($id)                    // GET /users/{id}.json - Get single user
+getUserByEmail($email)          // Search users by email field
+createUser($data)               // POST /users.json - Create new user
+updateUser($id, $data)          // PATCH /users/{id}.json - Update user
+deleteUser($id)                 // DELETE /users/{id}.json - Delete user
+
+// Appointment Operations
+getAppointments()               // GET /appointments.json - Get all appointments
+getAppointment($id)            // GET /appointments/{id}.json - Get single
+getAppointmentsByStudent($id)   // Filter by student_id - Get student's appointments
+createAppointment($data)       // POST /appointments.json - Create appointment
+updateAppointment($id, $data)  // PATCH /appointments/{id}.json - Update
+deleteAppointment($id)          // DELETE /appointments/{id}.json - Delete
+
+// Notification Operations
+getNotifications($studentId)   // GET /notifications/{studentId}.json
+createNotification($studentId, $data) // POST /notifications/{studentId}.json
+markAllNotificationsRead($studentId) // PATCH all notifications to is_read: true
+
+// Admin Log Operations
+getAdminLogs()                  // GET /admin_logs.json
+createAdminLog($data)           // POST /admin_logs.json
 ```
 
-### Statuses
-- **Pending** - Awaiting admin review
-- **Scheduled** - Date confirmed, awaiting pickup
-- **Settled** - Document picked up
-- **No-Show** - Student didn't show up
-- **Rejected** - Request denied
-- **Cancelled** - Cancelled by student or admin
+**Dependencies:**
+- Firebase REST API via cURL
+- Config module (for constants)
 
-### Reschedule Flow
-- Student requests reschedule → Status remains "Pending" with `rescheduled_date` and `reschedule_reason`
-- Admin can Accept (updates date) or Reject (keeps original date)
+**Relationships:**
+- Called by all action files for database operations
+- Called by view files for data retrieval
+
+### 3.3 Authentication Module (`includes/auth-check.php`)
+
+**Purpose:** Session and role verification
+
+**Key Functions:**
+```php
+sessionStart()                   // Start PHP session if not active
+isLoggedIn()                    // Check if user session exists
+requireOnceRole($requiredRole) // Verify user has correct role, redirect if not
+```
+
+**Session Structure:**
+```php
+$_SESSION = [
+    'student_id' => 'admin' | '23-xxxx-xxxxxx',  // User identifier
+    'role' => 'admin' | 'student',                // User role
+    'full_name' => 'Administrator' | 'Juan Dela Cruz'  // Display name
+]
+```
+
+**Dependencies:**
+- PHP session functions
+- Constants module (for roles)
+
+**Relationships:**
+- Used by all protected view pages
+- Used by action files for verification
+
+### 3.4 Layout Modules (`includes/layout-*.php`)
+
+**Purpose:** Reusable page templates with consistent sidebar navigation
+
+**Admin Layout (`layout-admin.php`):**
+- Full HTML document structure
+- Admin sidebar with:
+  - Overview → Dashboard
+  - Appointments (collapsible) → Today's Schedule, Pending, Future, Reschedule
+  - Management → Add Student, Activity Logs, Change Password
+- User menu with avatar, name, role, logout button
+- Top bar with page title and date
+- Content area wrapper
+
+**Student Layout (`layout-student.php`):**
+- Full HTML document structure
+- Student sidebar with:
+  - Appointments → Dashboard, New Appointment, Notifications
+  - Account → History, Change Password
+- User menu with avatar, name, role, logout button
+- Top bar with page title and date
+- Content area wrapper
+
+**Layout End (`layout-end.php`):**
+- Closes main content div
+- Closes app-layout div
+- Includes JavaScript
+- Closes body and html tags
+
+### 3.5 Icon Module (`includes/icon.php`)
+
+**Purpose:** SVG icon system for consistent UI
+
+**Function:**
+```php
+icon($name, $size = 20)  // Returns SVG string
+```
+
+**Available Icons:**
+- `clipboard` - Document/clipboard
+- `dashboard` - Dashboard
+- `calendar` - Calendar
+- `calendar-check` - Calendar with check
+- `clock` - Clock/waiting
+- `refresh` - Refresh/reschedule
+- `check` - Success/check
+- `x` - Close/error
+- `x-circle` - Error circle
+- `ban` - Cancel
+- `party` - Celebration
+- `alert` - Warning
+- `user` - Single user
+- `users` - Multiple users
+- `file-text` - Document
+- `graduation` - Diploma
+- `scroll` - History
+- `lock` - Password
+- `plus` - Add
+- `bell` - Notification
+- `trash` - Delete
+- `info` - Information
 
 ---
 
-## Login System
+## 4. Function & Method Analysis
 
-### Student Login
-- **URL:** `/views/login.php`
-- **Credentials:** Student ID (xx-xxxx-xxxxxx) or email (*.ui@phinmaed.com)
-- **Default Password:** `1` (must change on first login)
+### 4.1 Core Firebase Function
 
-### Admin Login
-- **URL:** `/views/admin/login.php`
-- **Username:** `admin`
-- **Password:** Set via `seed.php`
+**Function:** `firebaseRequest($method, $path, $data = null)`
 
-### Validation
-- Student login rejects admin credentials
-- Admin login rejects student IDs/emails
+| Aspect | Details |
+|--------|---------|
+| **Inputs** | `$method` (GET/POST/PATCH/DELETE), `$path` (Firebase path), `$data` (array, optional) |
+| **Process** | 1. Build Firebase REST URL with auth token, 2. Set cURL options, 3. Execute request, 4. Parse JSON response |
+| **Output** | Decoded JSON or null on error |
+| **Side Effects** | HTTP request to external Firebase API |
+| **Error Handling** | Returns null on failure, doesn't throw exceptions |
 
----
-
-## Features
-
-### Student Features
-1. **Dashboard** - View active appointments
-2. **Create Appointment** - Dynamic form fields based on document type
-3. **Edit Appointment** - Modify pending requests
-4. **View Appointment** - Full details with status
-5. **Reschedule** - Request date change (only for Scheduled)
-6. **Cancel** - Cancel appointment (reason required for Scheduled)
-7. **Notifications** - Real-time alerts for status changes
-8. **History** - View completed/cancelled appointments
-9. **Change Password** - Force change on first login
-
-### Admin Features
-1. **Dashboard** - Tab-based navigation (Today, Pending, Future, Reschedule)
-2. **Stats Cards** - Clickable to filter sections
-3. **Add Student** - Create new student accounts
-4. **Manage Appointment** - Full action controls:
-   - Accept & Schedule
-   - Reject
-   - Reschedule
-   - Mark as Settled
-   - Mark as No-Show
-   - Cancel
-5. **Activity Logs** - Track all admin actions
-6. **Change Password**
-
----
-
-## Database Schema (Firebase)
-
-### Users
-```json
-{
-  "student_id": "23-1234-567890",
-  "password": "$2y$10$...",
-  "role": "student",
-  "full_name": "Juan Dela Cruz",
-  "email": "juan.cruz.ui@phinmaed.com",
-  "is_first_login": true/false
+**Internal Logic:**
+```php
+function firebaseRequest($method, $path, $data = null) {
+    $url = FIREBASE_URL . $path . '?auth=' . FIREBASE_SECRET;
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    
+    if ($data) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    }
+    
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    return json_decode($response, true);
 }
 ```
 
-### Appointments
-```json
-{
-  "student_id": "23-1234-567890",
-  "type": "tor|diploma|request_rf|certificate",
-  "date": "2026-03-27",
-  "status": "Pending|Scheduled|Settled|No-Show|Rejected|Cancelled",
-  "details": { ... },
-  "rejection_reason": "",
-  "cancellation_reason": "",
-  "rescheduled_date": "",
-  "reschedule_reason": "",
-  "created_at": "timestamp"
+### 4.2 Authentication Functions
+
+**Function:** `isLoggedIn()`
+
+| Aspect | Details |
+|--------|---------|
+| **Inputs** | None |
+| **Process** | Start session, check if session variables exist |
+| **Output** | Boolean (true if logged in) |
+| **Side Effects** | Calls `sessionStart()` |
+
+```php
+function isLoggedIn() {
+    sessionStart();
+    return isset($_SESSION['student_id']) && isset($_SESSION['role']);
 }
 ```
 
-### Notifications
-```json
-{
-  "appointment_id": "...",
-  "type": "accepted|rejected|reschedule_accepted|reschedule_rejected|cancelled|settled|no_show",
-  "message": "...",
-  "is_read": true/false,
-  "created_at": "timestamp"
+**Function:** `requireOnceRole($requiredRole)`
+
+| Aspect | Details |
+|--------|---------|
+| **Inputs** | `$requiredRole` (ROLE_ADMIN or ROLE_STUDENT) |
+| **Process** | Check logged in and role matches, redirect if not |
+| **Output** | Void (exits if unauthorized) |
+| **Side Effects** | May redirect to login page |
+
+```php
+function requireOnceRole($requiredRole) {
+    if (!isLoggedIn() || $_SESSION['role'] !== $requiredRole) {
+        header('Location: /views/login.php');
+        exit;
+    }
 }
 ```
 
-### Admin Logs
-```json
-{
-  "action": "Accepted Appointment",
-  "admin_id": "admin",
-  "appointment_id": "...",
-  "details": "...",
-  "timestamp": "..."
-}
+### 4.3 Login Action (`actions/auth/login.php`)
+
+**Process Flow:**
+
+```
+1. START
+   │
+   ├─► Check if admin_login flag set in POST
+   │
+   ├─► IF admin_login:
+   │   │
+   │   ├─► Validate username and password not empty
+   │   │
+   │   ├─► REJECT if email format (@) or student ID format (xx-xxxx-xxxxxx)
+   │   │      (Error: "Student login not allowed here")
+   │   │
+   │   ├─► Get admin user from Firebase
+   │   │
+   │   ├─► Verify password with password_verify()
+   │   │
+   │   ├─► IF valid:
+   │   │   ├─► Set session: student_id='admin', role='admin'
+   │   │   ├─► Set full_name from user data
+   │   │   └─► Redirect to /views/admin/dashboard.php
+   │   │
+   │   └─► ELSE:
+   │          └─► Set error → redirect to /views/admin/login.php
+   │
+   └─► ELSE (student login):
+       │
+       ├─► Validate student_id/email and password not empty
+       │
+       ├─► REJECT if input is 'admin' (Error: "Use admin portal")
+       │
+       ├─► IF email format (contains @):
+       │      ├─► Call getUserByEmail()
+       │      └─► Get user data and student ID
+       │
+       ├─► ELSE (student ID format):
+       │      └─► Call getUser(student_id)
+       │
+       ├─► Verify password with password_verify()
+       │
+       ├─► IF valid:
+       │   ├─► IF is_first_login:
+       │   │      └─► Redirect to /views/change-password.php
+       │   │
+       │   └─► ELSE:
+       │          ├─► Set session with user data
+       │          └─► Redirect to /views/student/dashboard.php
+       │
+       └─► ELSE:
+              └─► Set error → redirect to /views/login.php
+```
+
+### 4.4 Create Appointment Action (`actions/student/create-appointment.php`)
+
+**Process Flow:**
+
+```
+1. START (POST data: type, date, details[])
+   │
+   ├─► Validate type is set
+   ├─► Validate date is set and >= today
+   │
+   ├─► SWITCH type:
+   │   ├─► tor: require contact_no, purpose, copy_quantity
+   │   ├─► diploma: require year_graduated
+   │   ├─► request_rf: require contact_no, semester, school_year, purpose
+   │   └─► certificate: require contact_no, course, certification_type, purpose, copy_quantity
+   │
+   ├─► Create appointment data array:
+   │   {
+   │     student_id: from session,
+   │     type: from POST,
+   │     date: from POST,
+   │     status: 'Pending',
+   │     details: from POST[details],
+   │     created_at: current timestamp
+   │   }
+   │
+   ├─► Call createAppointment(data)
+   │
+   ├─► IF success:
+   │   └─► Redirect to /views/student/dashboard.php
+   │
+   └─► ELSE:
+       └─► Set error → redirect to /views/student/create-appointment.php
+```
+
+### 4.5 Admin Accept Appointment (`actions/admin/accept-appointment.php`)
+
+**Process Flow:**
+
+```
+1. START (POST data: id, scheduled_date)
+   │
+   ├─► Get appointment from Firebase
+   │
+   ├─► Validate appointment exists
+   ├─► Validate scheduled_date >= today
+   │
+   ├─► Update appointment:
+   │   {
+   │     status: 'Scheduled',
+   │     date: scheduled_date
+   │   }
+   │
+   ├─► Create notification for student:
+   │   {
+   │     type: 'accepted',
+   │     message: "Your appointment has been scheduled for scheduled_date",
+   │     is_read: false,
+   │     created_at: timestamp
+   │   }
+   │
+   ├─► Create admin log:
+   │   {
+   │     action: 'Accepted Appointment',
+   │     admin_id: from session,
+   │     appointment_id: id,
+   │     details: "Scheduled for scheduled_date",
+   │     timestamp: timestamp
+   │   }
+   │
+   ├─► Redirect to /views/admin/dashboard.php
+```
+
+### 4.6 Dynamic Form Fields (Student Create/Edit)
+
+**JavaScript in `views/student/create-appointment.php` and `edit-appointment.php`:**
+
+The form displays different fields based on appointment type selection:
+
+```javascript
+const fieldsConfig = {
+    tor: `
+        <div class="form-group">
+            <label for="contact_no">Contact Number</label>
+            <input type="tel" name="details[contact_no]" required>
+        </div>
+        <div class="form-group">
+            <label for="purpose">Purpose</label>
+            <input type="text" name="details[purpose]" required>
+        </div>
+        <div class="form-group">
+            <label for="copy_quantity">Number of Copies</label>
+            <input type="number" name="details[copy_quantity]" min="1" required>
+        </div>
+    `,
+    diploma: `...`,
+    request_rf: `...`,
+    certificate: `...`
+};
+
+typeSelect.addEventListener('change', function() {
+    if (fieldsConfig[this.value]) {
+        dynamicFields.innerHTML = fieldsConfig[this.value];
+    }
+});
 ```
 
 ---
 
-## API Endpoints
+## 5. Data Flow & Dependencies
 
-Base URL: `https://regitrackdb-default-rtdb.asia-southeast1.firebasedatabase.app/`
-Auth: `?auth=rEEWOVbG9kmWy0JHZkDXFWKTBcmsHbVQkoLXJJjm`
+### 5.1 Session State Flow
 
-All operations go through `/includes/firebase-helper.php` functions:
-- `getUsers()`, `getUser($id)`, `getUserByEmail($email)`
-- `getAppointments()`, `getAppointment($id)`, `getAppointmentsByStudent($id)`
-- `createAppointment()`, `updateAppointment()`, `deleteAppointment()`
-- `getNotifications()`, `markAllNotificationsRead()`
-- `getAdminLogs()`, `createAdminLog()`
-
----
-
-## Running the System
-
-```bash
-cd /home/xian/Documents/final
-php -S localhost:8000
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      SESSION STATE                              │
+├─────────────────────────────────────────────────────────────────┤
+│ $_SESSION = {                                                  │
+│     'student_id' => 'admin' | '23-xxxx-xxxxxx',               │
+│     'role' => 'admin' | 'student',                            │
+│     'full_name' => 'Administrator' | 'Juan Dela Cruz'         │
+│ }                                                              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         ▼                    ▼                    ▼
+    ┌──────────┐        ┌──────────┐         ┌──────────┐
+    │  Auth    │        │  Views  │         │ Actions  │
+    │  Check   │        │         │         │          │
+    │          │        │         │         │          │
+    │ isLogged │        │ Layout  │         │ Process  │
+    │In()      │        │ Choice  │         │ Form     │
+    │          │        │         │         │ Data     │
+    │ require  │        │         │         │          │
+    │OnceRole()│        │         │         │          │
+    └──────────┘        └──────────┘         └──────────┘
 ```
 
-Then visit:
-- Student: `http://localhost:8000/views/login.php`
-- Admin: `http://localhost:8000/views/admin/login.php`
+### 5.2 Request-Response Flow
 
-### Test Data
-Run `php busy-seed.php` to create test students with various appointment statuses.
+```
+┌─────────────┐     HTTP      ┌──────────────┐     HTTP       ┌─────────────┐
+│   Browser   │ ───────────► │   PHP App    │ ────────────► │  Firebase  │
+│             │    Request   │              │    Request    │  (Database)│
+│             │              │              │               │             │
+│  User       │              │  index.php  │               │             │
+│  clicks     │              │      │      │               │             │
+│  form       │              │      ▼      │               │             │
+│             │              │  auth-      │               │             │
+│             │              │  check.php  │               │             │
+│             │              │      │      │               │             │
+│             │              │      ▼      │               │             │
+│             │              │  firebase-  │               │             │
+│             │              │  helper.php  │               │             │
+│             │              │      │      │               │             │
+│             │              │      ▼      │               │             │
+│             │              │  action.php  │               │             │
+│             │              │      │      │               │             │
+│             │              │      ▼      │               │             │
+│             │              │  view.php   │               │             │
+│             │◄──────────── │              │ ◄─────────── │             │
+│             │   Response  │              │   Response   │             │
+└─────────────┘              └──────────────┘              └─────────────┘
+```
 
-### Admin Account
-Run `php seed.php` to create admin (username: `admin`, password: `1`)
+### 5.3 Database Interaction Flow
+
+```
+                    ┌─────────────────────────────────────────┐
+                    │           Firebase Realtime DB           │
+                    │                                         │
+                    │  /                                       │
+                    │  ├── users/                             │
+                    │  │   ├── admin/                         │
+                    │  │   │   ├── password                     │
+                    │  │   │   ├── role                         │
+                    │  │   │   ├── full_name                   │
+                    │  │   │   └── is_first_login              │
+                    │  │   └── 23-xxxx-xxxxxx/                 │
+                    │  │       └── ...                         │
+                    │  │                                       │
+                    │  ├── appointments/                       │
+                    │  │   └── -Nkxxxx/                       │
+                    │  │       ├── student_id                  │
+                    │  │       ├── type                       │
+                    │  │       ├── date                        │
+                    │  │       ├── status                      │
+                    │  │       ├── details                     │
+                    │  │       └── created_at                  │
+                    │  │                                       │
+                    │  ├── notifications/                      │
+                    │  │   └── 23-xxxx-xxxxxx/                 │
+                    │  │       └── -Nkxxxx/                    │
+                    │  │           ├── type                    │
+                    │  │           ├── message                 │
+                    │  │           └── is_read                  │
+                    │  │                                       │
+                    │  └── admin_logs/                        │
+                    │      └── -Nkxxxx/                        │
+                    │          ├── action                      │
+                    │          ├── admin_id                    │
+                    │          └── timestamp                   │
+                    │                                         │
+                    └─────────────────────────────────────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         ▼                    ▼                    ▼
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│    GET       │      │    POST      │      │   PATCH      │
+│   (Read)     │      │   (Create)   │      │   (Update)   │
+│              │      │              │      │              │
+│ getUsers()   │      │ createUser() │      │ updateUser() │
+│ getUser()    │      │ createAppt() │      │ updateAppt() │
+│ getAppts()   │      │ createNotif()│      │ markRead()   │
+│ getNotifs()  │      │ createLog()  │      │              │
+└──────────────┘      └──────────────┘      └──────────────┘
+```
+
+### 5.4 External Dependencies
+
+| Dependency | Purpose | Connection |
+|------------|---------|------------|
+| Firebase Realtime Database | Primary data store | REST API via cURL |
+| PHP Session | User state management | Native PHP |
+| DM Sans Font | Typography | Google Fonts CDN |
+| JetBrains Mono Font | Code/ID display | Google Fonts CDN |
+
+### 5.5 Data Validation Chain
+
+```
+User Input (Form)
+       │
+       ▼
+PHP Action (POST handler)
+       │
+       ├──► Input validation (isset, empty checks)
+       │
+       ├──► Type-specific validation (switch on type)
+       │
+       ├──► Data sanitization (htmlspecialchars on output)
+       │
+       ├──► Firebase helper function
+       │
+       └──► Firebase (stored)
+```
 
 ---
 
-## Design System
+## 6. Execution Flow
 
-### Colors (Dark Theme)
-- Background: `#08080c`
-- Surface: `#101018`
-- Accent: `#7c5cff`
-- Success: `#22c55e`
-- Warning: `#f59e0b`
-- Danger: `#ef4444`
+### 6.1 Application Startup (Root URL)
 
-### Typography
-- Font: DM Sans
-- Headings: Bold, various sizes
+```
+http://localhost:8000/
+         │
+         ▼
+┌─────────────────────┐
+│     index.php       │
+│                     │
+│ require constants   │
+│ require auth-check │
+│                     │
+│ if !isLoggedIn():   │
+│   redirect /login  │
+│                     │
+│ if role == admin:   │
+│   redirect /admin  │
+│                     │
+│ else:               │
+│   redirect /student│
+└─────────────────────┘
+```
 
-### Components
-- Cards with headers
-- Tables with hover states
-- Status badges (color-coded)
-- Modal dialogs
-- Form inputs with focus states
+### 6.2 Student Login Flow
+
+```
+http://localhost:8000/views/login.php
+         │
+         ▼
+┌─────────────────────┐
+│    views/login.php  │
+│                     │
+│ require constants   │
+│ require auth-check  │
+│ require icon        │
+│                     │
+│ if isLoggedIn():    │
+│   redirect to      │
+│   appropriate      │
+│   dashboard        │
+│                     │
+│ Show login form     │
+└─────────────────────┘
+         │
+         │ POST
+         ▼
+┌─────────────────────┐
+│ actions/auth/login  │
+│                     │
+│ session_start()     │
+│                     │
+│ Validate inputs     │
+│                     │
+│ Check admin flag    │
+│                     │
+├─► If admin_login:   │
+│   Check not student│
+│   ID/email format   │
+│   Verify admin     │
+│   Set admin session│
+│   Redirect admin   │
+│                     │
+├─► Else (student):   │
+│   Check not 'admin'│
+│   Look up user     │
+│   Verify password  │
+│   Check first login│
+│   Set student      │
+│   session          │
+│   Redirect student │
+└─────────────────────┘
+```
+
+### 6.3 Protected Page Access
+
+```
+http://localhost:8000/views/admin/dashboard.php
+         │
+         ▼
+┌─────────────────────┐
+│  admin/dashboard   │
+│                     │
+│ require constants   │
+│ require auth-check  │
+│ requireOnceRole    │
+│ (ROLE_ADMIN)       │
+│                     │
+│ if !isLoggedIn()   │
+│   OR role != admin:│
+│   redirect /login  │
+│                     │
+│ Get data from      │
+│ Firebase           │
+│                     │
+│ Include layout      │
+│ Render page        │
+└─────────────────────┘
+```
+
+### 6.4 Form Submission Flow
+
+```
+User fills form → Clicks submit
+         │
+         ▼
+POST to action file
+         │
+         ▼
+Action processes:
+  1. Start session
+  2. Validate input
+  3. Call Firebase helper
+  4. Create/Update data
+  5. Create notifications (if needed)
+  6. Create admin log (if admin)
+  7. Redirect to next page
+         │
+         ▼
+Browser receives redirect
+         │
+         ▼
+New page loads with updated data
+```
+
+### 6.5 Appointment Lifecycle States
+
+```
+┌─────────┐     accept      ┌────────────┐    pickup     ┌─────────┐
+│ PENDING │ ────────────► │ SCHEDULED │ ────────────► │ SETTLED│
+└─────────┘                └────────────┘               └─────────┘
+    │                         │
+    │ reject                 │ mark
+    ▼                        ▼
+┌──────────┐              ┌─────────┐
+│ REJECTED │              │ NO-SHOW │
+└──────────┘              └─────────┘
+    │
+    │ cancel (student)
+    ▼
+┌────────────┐
+│ CANCELLED │
+└────────────┘
+    │
+    │ reschedule request
+    ▼
+(reschedule fields added, stays Pending)
+```
+
+### 6.6 Asynchronous Operations
+
+There are no asynchronous operations in this system:
+
+- **No AJAX calls** - All form submissions are standard POST requests
+- **No WebSockets** - Notifications are fetched on page load
+- **No JavaScript fetch** - All data comes from PHP rendering
+
+Notifications are created synchronously when admin actions occur:
+```
+Admin accepts → Update appointment → Create notification → Create log → Redirect
+```
 
 ---
 
-## Security
+## Summary
 
-- Passwords hashed with `password_hash()`
-- Session-based authentication
-- Role-based access control
-- Input sanitization with `htmlspecialchars()`
-- CSRF protection via session checks
+This completes the exhaustive analysis of the RegiTrack codebase. The system is built with:
 
----
+- **Clean architecture** - Clear separation of config, includes, actions, and views
+- **Simple data flow** - PHP sessions → Firebase REST API
+- **No frameworks** - Pure PHP demonstrating fundamental web development
+- **Role-based access** - Separate flows for students and admins
+- **Complete CRUD** - All database operations via Firebase helper
 
-## Notes for Project Defense
-
-1. **Simple & Modular** - Each file has a single responsibility
-2. **No Frameworks** - Pure PHP demonstrates understanding of fundamentals
-3. **Firebase Integration** - Shows ability to work with REST APIs
-4. **Clean Code** - Readable, explainable for 3rd-year students
-5. **Error Handling** - Proper validation and user feedback
-
----
-
-## Future Improvements (Optional)
-
-- Email notifications
-- PDF document generation
-- SMS reminders
-- Analytics dashboard
-- Multi-admin support
+Use this document as a reference to understand any part of the system's implementation.
