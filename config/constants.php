@@ -28,7 +28,7 @@ $APPOINTMENT_TYPES = [
     ],
     'request_rf' => [
         'label' => 'Request RF',
-        'fields' => ['contact_no', 'semester', 'school_year', 'message']
+        'fields' => ['contact_no', 'semester', 'school_year', 'purpose']
     ],
     'certificate' => [
         'label' => 'Certificate',

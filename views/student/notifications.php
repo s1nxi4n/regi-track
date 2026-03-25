@@ -30,6 +30,12 @@ include_once __DIR__ . '/../../includes/header.php';
 <div class="container">
     <h1>Notifications</h1>
     
+    <?php if (!empty($notificationsArray)): ?>
+    <form action="../../actions/student/clear-notifications.php" method="POST" style="margin-bottom: 1rem;">
+        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Clear all notifications?')">Clear All</button>
+    </form>
+    <?php endif; ?>
+    
     <?php if (empty($notificationsArray)): ?>
         <p>No notifications.</p>
     <?php else: ?>

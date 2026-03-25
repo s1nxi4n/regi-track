@@ -30,6 +30,7 @@ if (!$appointment) {
 
 $oldDate = $appointment['date'];
 $studentId = $appointment['student_id'];
+$student = getUser($studentId);
 
 updateAppointment($id, [
     'date' => $newDate,
@@ -40,7 +41,7 @@ updateAppointment($id, [
 
 createNotification($studentId, $id, 'admin_rescheduled', 'Your appointment has been rescheduled from ' . $oldDate . ' to ' . $newDate . '. Reason: ' . $reason);
 
-logAdminAction($_SESSION['student_id'], 'Rescheduled appointment', $id, "Changed from $oldDate to $newDate. Reason: $reason");
+logAdminAction($_SESSION['student_id'], 'Rescheduled appointment', $id, ($student['full_name'] ?? $studentId) . " - $oldDate to $newDate. Reason: $reason");
 
 $_SESSION['manage_success'] = 'Appointment rescheduled from ' . htmlspecialchars($oldDate) . ' to ' . htmlspecialchars($newDate);
 header('Location: ../../views/admin/manage-appointment.php?id=' . $id);

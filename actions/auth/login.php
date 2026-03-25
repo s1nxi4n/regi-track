@@ -5,16 +5,16 @@ require_once __DIR__ . '/../../config/constants.php';
 
 session_start();
 
-$studentId = trim($_POST['student_id'] ?? '');
+$loginInput = trim($_POST['student_id'] ?? '');
 $password = $_POST['password'] ?? '';
 
-if (empty($studentId) || empty($password)) {
-    $_SESSION['login_error'] = 'Please enter both student ID and password.';
+if (empty($loginInput) || empty($password)) {
+    $_SESSION['login_error'] = 'Please enter both student ID/email and password.';
     header('Location: ../../views/login.php');
     exit;
 }
 
-if ($studentId === 'admin') {
+if ($loginInput === 'admin') {
     $user = getUser('admin');
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['student_id'] = 'admin';
@@ -24,7 +24,19 @@ if ($studentId === 'admin') {
         exit;
     }
 } else {
-    $user = getUser($studentId);
+    $user = null;
+    $studentId = $loginInput;
+    
+    if (strpos($loginInput, '@') !== false) {
+        $result = getUserByEmail($loginInput);
+        if ($result) {
+            $user = $result['user'];
+            $studentId = $result['id'];
+        }
+    } else {
+        $user = getUser($loginInput);
+    }
+    
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['student_id'] = $studentId;
         $_SESSION['role'] = $user['role'];

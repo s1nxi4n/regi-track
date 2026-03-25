@@ -77,8 +77,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <input type="text" id="school_year" name="details[school_year]" placeholder="e.g., 2024-2025" required>
                 </div>
                 <div class="form-group">
-                    <label for="message">Message (Optional)</label>
-                    <textarea id="message" name="details[message]"></textarea>
+                    <label for="purpose">Purpose</label>
+                    <textarea id="purpose" name="details[purpose]" required></textarea>
                 </div>
             `,
             certificate: `

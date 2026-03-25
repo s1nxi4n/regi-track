@@ -53,13 +53,15 @@ include_once __DIR__ . '/../../includes/header.php';
         <div id="dynamic_fields">
             <?php
             $typeFields = $APPOINTMENT_TYPES[$appointment['type']]['fields'] ?? [];
+            $requiredFields = ['purpose', 'contact_no', 'year_graduated', 'semester', 'school_year', 'course', 'certification_type'];
             foreach ($typeFields as $field):
             ?>
             <div class="form-group">
                 <label for="<?= $field ?>"><?= htmlspecialchars(ucwords(str_replace('_', ' ', $field))) ?></label>
                 <input type="text" id="<?= $field ?>" name="details[<?= $field ?>]" 
                        value="<?= htmlspecialchars($appointment['details'][$field] ?? '') ?>" 
-                       <?= in_array($field, ['copy_quantity', 'year_graduated']) ? 'type="number"' : 'type="text"' ?>>
+                       <?= in_array($field, ['copy_quantity', 'year_graduated']) ? 'type="number"' : 'type="text"' ?>
+                       <?= in_array($field, $requiredFields) ? 'required' : '' ?>>
             </div>
             <?php endforeach; ?>
         </div>

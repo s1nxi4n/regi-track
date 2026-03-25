@@ -43,6 +43,16 @@ function getUser($studentId) {
     return $users[$studentId] ?? null;
 }
 
+function getUserByEmail($email) {
+    $users = firebaseRequest(USERS_PATH) ?? [];
+    foreach ($users as $id => $user) {
+        if (isset($user['email']) && strtolower($user['email']) === strtolower($email)) {
+            return ['id' => $id, 'user' => $user];
+        }
+    }
+    return null;
+}
+
 function createUser($studentId, $password, $role = ROLE_STUDENT, $fullName = '', $email = '') {
     return firebaseRequest(USERS_PATH . '/' . $studentId, 'PUT', [
         'student_id' => $studentId,

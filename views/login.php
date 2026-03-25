@@ -30,9 +30,9 @@ unset($_SESSION['login_error']);
         
         <form action="../actions/auth/login.php" method="POST">
             <div class="form-group">
-                <label for="student_id">Student ID / Admin Username</label>
+                <label for="student_id">Student ID / Email / Admin Username</label>
                 <input type="text" id="student_id" name="student_id" required 
-                       placeholder="xx-xxxx-xxxxxx or admin">
+                       placeholder="xx-xxxx-xxxxxx, email@phinmaed.com, or admin">
             </div>
             
             <div class="form-group">

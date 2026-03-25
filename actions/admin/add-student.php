@@ -48,7 +48,7 @@ if ($existingUser) {
 
 createUser($studentId, $studentId, ROLE_STUDENT, $fullName, $email);
 
-logAdminAction($_SESSION['student_id'], 'Added student', $studentId, 'Created account with default password');
+logAdminAction($_SESSION['student_id'], 'Added student', $studentId, $fullName);
 
 $_SESSION['add_student_success'] = 'Student added successfully! Default password: ' . htmlspecialchars($studentId);
 header('Location: ../../views/admin/add-student.php');

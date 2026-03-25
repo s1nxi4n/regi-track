@@ -14,12 +14,13 @@ if (!$appointment) {
 }
 
 $studentId = $appointment['student_id'];
+$student = getUser($studentId);
 
 updateAppointment($id, ['status' => STATUS_NO_SHOW]);
 
 createNotification($studentId, $id, 'no_show', 'You did not show up for your appointment. Please contact the registrar.');
 
-logAdminAction($_SESSION['student_id'], 'Marked no-show', $id, 'Student did not arrive');
+logAdminAction($_SESSION['student_id'], 'Marked no-show', $id, ($student['full_name'] ?? $studentId) . ' - Did not arrive');
 
 $_SESSION['manage_success'] = 'Appointment marked as no-show.';
 header('Location: ../../views/admin/manage-appointment.php?id=' . $id);

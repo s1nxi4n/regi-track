@@ -1,7 +1,7 @@
 <?php
 
-define('FIREBASE_DB_URL', 'https://regitrackdb-97c18-default-rtdb.asia-southeast1.firebasedatabase.app');
-define('FIREBASE_SECRET', 'xhk4DuJfZccA05IDLga5hQZvhx2YJkSVPRkVTTMl');
+define('FIREBASE_DB_URL', 'https://regitrackdb-default-rtdb.asia-southeast1.firebasedatabase.app');
+define('FIREBASE_SECRET', 'rEEWOVbG9kmWy0JHZkDXFWKTBcmsHbVQkoLXJJjm');
 
 define('USERS_PATH', '/users');
 define('APPOINTMENTS_PATH', '/appointments');

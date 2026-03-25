@@ -30,7 +30,8 @@ updateAppointment($id, [
 
 createNotification($studentId, $id, 'cancelled', 'Your appointment has been cancelled. Reason: ' . $reason);
 
-logAdminAction($_SESSION['student_id'], 'Cancelled appointment', $id, 'Reason: ' . $reason);
+$student = getUser($studentId);
+logAdminAction($_SESSION['student_id'], 'Cancelled appointment', $id, ($student['full_name'] ?? $studentId) . ' - Reason: ' . $reason);
 
 $_SESSION['manage_success'] = 'Appointment cancelled.';
 header('Location: ../../views/admin/dashboard.php');

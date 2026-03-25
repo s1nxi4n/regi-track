@@ -7,6 +7,8 @@ require_once __DIR__ . '/../../includes/firebase-helper.php';
 $pageTitle = 'Dashboard - RegiTrack';
 $studentId = $_SESSION['student_id'];
 $appointments = getAppointmentsByStudent($studentId);
+$cancelError = $_SESSION['cancel_error'] ?? '';
+unset($_SESSION['cancel_error']);
 
 $activeAppointments = [];
 $statusOrder = STATUS_ORDER;
@@ -30,6 +32,10 @@ include_once __DIR__ . '/../../includes/header.php';
 
 <div class="container">
     <h1>Welcome, <?= htmlspecialchars($_SESSION['full_name'] ?? $studentId) ?></h1>
+    
+    <?php if ($cancelError): ?>
+        <div class="error"><?= htmlspecialchars($cancelError) ?></div>
+    <?php endif; ?>
     
     <div class="actions-bar">
         <a href="create-appointment.php" class="btn btn-primary">+ New Appointment</a>
@@ -64,10 +70,7 @@ include_once __DIR__ . '/../../includes/header.php';
                                 <a href="edit-appointment.php?id=<?= $apt['id'] ?>" class="btn btn-secondary">Edit</a>
                             <?php endif; ?>
                             <a href="view-appointment.php?id=<?= $apt['id'] ?>" class="btn btn-secondary">View</a>
-                            <form action="../../actions/student/cancel-appointment.php" method="POST" style="display:inline;">
-                                <input type="hidden" name="id" value="<?= $apt['id'] ?>">
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('Cancel this appointment?')">Cancel</button>
-                            </form>
+                            <button type="button" class="btn btn-danger" onclick="openCancelModal('<?= $apt['id'] ?>', '<?= $apt['status'] ?>')">Cancel</button>
                         </div>
                     </td>
                 </tr>
@@ -76,5 +79,38 @@ include_once __DIR__ . '/../../includes/header.php';
         </table>
     <?php endif; ?>
 </div>
+
+<div id="cancelModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('cancelModal')">&times;</span>
+        <h2>Cancel Appointment</h2>
+        <form action="../../actions/student/cancel-appointment.php" method="POST">
+            <input type="hidden" name="id" id="cancelAppointmentId">
+            <div id="cancelReasonGroup" class="form-group" style="display:none;">
+                <label for="reason">Reason for Cancellation</label>
+                <textarea id="reason" name="reason"></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+            <button type="button" class="btn btn-secondary modal-cancel" onclick="closeModal('cancelModal')">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openCancelModal(id, status) {
+    document.getElementById('cancelAppointmentId').value = id;
+    var reasonGroup = document.getElementById('cancelReasonGroup');
+    var reasonInput = document.getElementById('reason');
+    if (status === 'Scheduled') {
+        reasonGroup.style.display = 'block';
+        reasonInput.required = true;
+    } else {
+        reasonGroup.style.display = 'none';
+        reasonInput.required = false;
+        reasonInput.value = '';
+    }
+    document.getElementById('cancelModal').classList.add('active');
+}
+</script>
 
 <?php include_once __DIR__ . '/../../includes/footer.php'; ?>

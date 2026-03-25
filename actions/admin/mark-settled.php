@@ -14,12 +14,13 @@ if (!$appointment) {
 }
 
 $studentId = $appointment['student_id'];
+$student = getUser($studentId);
 
 updateAppointment($id, ['status' => STATUS_SETTLED]);
 
 createNotification($studentId, $id, 'settled', 'Your appointment has been completed (Settled).');
 
-logAdminAction($_SESSION['student_id'], 'Marked settled', $id, 'Appointment completed');
+logAdminAction($_SESSION['student_id'], 'Marked settled', $id, ($student['full_name'] ?? $studentId) . ' - Completed');
 
 $_SESSION['manage_success'] = 'Appointment marked as settled.';
 header('Location: ../../views/admin/manage-appointment.php?id=' . $id);
