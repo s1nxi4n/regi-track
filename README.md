@@ -1,6 +1,6 @@
 # RegiTrack - Appointment Tracking System
 
-A PHP + Firebase-based appointment tracking system for PHINMA Education (3rd-year IT Capstone Project).
+A PHP + Firebase-based appointment tracking system for PHINMA Education.
 
 ---
 
