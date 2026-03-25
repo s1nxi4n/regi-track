@@ -102,12 +102,12 @@ include_once __DIR__ . '/../../includes/header.php';
     
     <?php if ($appointment['status'] === STATUS_PENDING && !empty($appointment['rescheduled_date'])): ?>
     <div class="actions">
-        <form action="../../actions/admin/accept-reschedule.php" method="POST" style="display:inline;">
+        <form action="../../actions/admin/accept-reschedule.php" method="POST">
             <input type="hidden" name="id" value="<?= $id ?>">
             <button type="submit" class="btn btn-success">Accept Reschedule</button>
         </form>
         
-        <form action="../../actions/admin/reject-reschedule.php" method="POST" style="display:inline;">
+        <form action="../../actions/admin/reject-reschedule.php" method="POST">
             <input type="hidden" name="id" value="<?= $id ?>">
             <button type="submit" class="btn btn-danger">Reject Reschedule</button>
         </form>
@@ -117,12 +117,12 @@ include_once __DIR__ . '/../../includes/header.php';
     <?php if ($appointment['status'] === STATUS_SCHEDULED): ?>
     <div class="actions">
         <button onclick="openModal('rescheduleModal')" class="btn btn-primary">Reschedule</button>
-        <form action="../../actions/admin/mark-settled.php" method="POST" style="display:inline;">
+        <form action="../../actions/admin/mark-settled.php" method="POST">
             <input type="hidden" name="id" value="<?= $id ?>">
             <button type="submit" class="btn btn-success">Mark as Settled</button>
         </form>
         
-        <form action="../../actions/admin/mark-no-show.php" method="POST" style="display:inline;">
+        <form action="../../actions/admin/mark-no-show.php" method="POST">
             <input type="hidden" name="id" value="<?= $id ?>">
             <button type="submit" class="btn btn-danger">Mark as No-Show</button>
         </form>
@@ -167,7 +167,7 @@ include_once __DIR__ . '/../../includes/header.php';
     </div>
     <?php endif; ?>
     
-    <a href="dashboard.php" class="btn btn-secondary" style="margin-top: 1rem;">Back to Dashboard</a>
+    <a href="dashboard.php" class="btn btn-secondary mt-4">Back to Dashboard</a>
 </div>
 
 <?php include_once __DIR__ . '/../../includes/footer.php'; ?>

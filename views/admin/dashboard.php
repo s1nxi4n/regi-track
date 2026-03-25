@@ -85,7 +85,7 @@ include_once __DIR__ . '/../../includes/header.php';
         </div>
     </div>
     
-    <div class="card" style="margin-top: 1.5rem;">
+    <div class="card mt-6">
         <h3>Pending Requests (<?= count($pendingAppointments) ?>)</h3>
         <?php if (empty($pendingAppointments)): ?>
             <p>No pending appointments.</p>
@@ -110,7 +110,7 @@ include_once __DIR__ . '/../../includes/header.php';
     </div>
     
     <?php if (!empty($rescheduleRequests)): ?>
-    <div class="card" style="margin-top: 1.5rem;">
+    <div class="card mt-6">
         <h3>Reschedule Requests (<?= count($rescheduleRequests) ?>)</h3>
         <table>
             <tr><th>Student</th><th>Type</th><th>Current Date</th><th>Requested Date</th><th>Reason</th><th>Actions</th></tr>

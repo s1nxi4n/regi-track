@@ -31,12 +31,12 @@ include_once __DIR__ . '/../../includes/header.php';
         <div class="success"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
     
-    <div class="actions-bar" style="margin-bottom: 1rem;">
+    <div class="actions-bar mb-4">
         <a href="dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
     </div>
     
     <?php if (!empty($historyAppointments)): ?>
-    <form action="../../actions/student/clear-history.php" method="POST" style="display:inline; margin-bottom: 1rem;">
+    <form action="../../actions/student/clear-history.php" method="POST" class="mb-4">
         <input type="hidden" name="clear_all" value="1">
         <button type="submit" class="btn btn-danger" onclick="return confirm('Clear ALL history? This cannot be undone.')">Clear All History</button>
     </form>
@@ -63,7 +63,7 @@ include_once __DIR__ . '/../../includes/header.php';
                     <td>
                         <div class="actions">
                             <a href="view-appointment.php?id=<?= $apt['id'] ?>" class="btn btn-secondary">View</a>
-                            <form action="../../actions/student/clear-history.php" method="POST" style="display:inline;">
+                            <form action="../../actions/student/clear-history.php" method="POST">
                                 <input type="hidden" name="id" value="<?= $apt['id'] ?>">
                                 <button type="submit" class="btn btn-danger" onclick="return confirm('Remove from history?')">Clear</button>
                             </form>

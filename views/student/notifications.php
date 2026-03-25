@@ -31,7 +31,7 @@ include_once __DIR__ . '/../../includes/header.php';
     <h1>Notifications</h1>
     
     <?php if (!empty($notificationsArray)): ?>
-    <form action="../../actions/student/clear-notifications.php" method="POST" style="margin-bottom: 1rem;">
+    <form action="../../actions/student/clear-notifications.php" method="POST" class="mb-4">
         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Clear all notifications?')">Clear All</button>
     </form>
     <?php endif; ?>
@@ -70,37 +70,7 @@ include_once __DIR__ . '/../../includes/header.php';
         </div>
     <?php endif; ?>
     
-    <a href="dashboard.php" class="btn btn-secondary" style="margin-top: 1rem;">Back to Dashboard</a>
+    <a href="dashboard.php" class="btn btn-secondary mt-4">Back to Dashboard</a>
 </div>
-
-<style>
-.notifications-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-.notification-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-}
-.notification-card.unread {
-    background: #e3f2fd;
-    border-left: 4px solid #2196f3;
-}
-.notification-icon {
-    font-size: 1.5rem;
-}
-.notification-content {
-    flex: 1;
-}
-.notification-content p {
-    margin: 0 0 0.25rem 0;
-}
-.notification-content small {
-    color: #666;
-}
-</style>
 
 <?php include_once __DIR__ . '/../../includes/footer.php'; ?>

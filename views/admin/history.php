@@ -49,7 +49,7 @@ include_once __DIR__ . '/../../includes/header.php';
     <h1>Activity Log</h1>
     
     <?php if (!empty($logsArray)): ?>
-    <form action="../../actions/admin/clear-logs.php" method="POST" style="margin-bottom: 1rem;">
+    <form action="../../actions/admin/clear-logs.php" method="POST" class="mb-4">
         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Clear all?')">Clear</button>
     </form>
     <?php endif; ?>
@@ -82,7 +82,7 @@ include_once __DIR__ . '/../../includes/header.php';
         </div>
     <?php endif; ?>
     
-    <a href="dashboard.php" class="btn btn-secondary" style="margin-top: 1rem;">Back</a>
+    <a href="dashboard.php" class="btn btn-secondary mt-4">Back</a>
 </div>
 
 <div id="logDetailModal" class="modal">
@@ -126,20 +126,8 @@ function showLogDetails(key) {
     html += '</div>';
     
     document.getElementById('logDetailContent').innerHTML = html;
-    document.getElementById('logDetailModal').classList.add('active');
+    openModal('logDetailModal');
 }
 </script>
-
-<style>
-.log-list { display: flex; flex-direction: column; gap: 0.5rem; }
-.log-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #fff; border-radius: 4px; border-left: 3px solid #667eea; cursor: pointer; transition: background 0.2s; }
-.log-item:hover { background: #f5f5f5; }
-.log-icon { font-size: 1.2rem; }
-.log-text { flex: 1; font-size: 0.9rem; }
-.log-text strong { color: #333; }
-.log-time { font-size: 0.75rem; color: #888; white-space: nowrap; }
-.btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
-.details-box p { margin-bottom: 0.5rem; }
-</style>
 
 <?php include_once __DIR__ . '/../../includes/footer.php'; ?>
