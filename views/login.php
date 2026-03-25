@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../includes/auth-check.php';
+require_once __DIR__ . '/../includes/icon.php';
 
 if (isLoggedIn()) {
     $redirect = $_SESSION['role'] === ROLE_ADMIN ? '../views/admin/dashboard.php' : '../views/student/dashboard.php';
@@ -18,20 +19,20 @@ unset($_SESSION['login_error']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - RegiTrack</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c5cff' stroke-width='2'><path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/><rect x='8' y='2' width='8' height='4' rx='1' ry='1'/></svg>">
 </head>
 <body>
     <div class="login-page">
         <div class="login-card">
             <div class="login-header">
-                <div class="login-logo">📋</div>
+                <div class="login-logo"><?= icon('clipboard', 48) ?></div>
                 <h1 class="login-title">RegiTrack</h1>
                 <p class="login-subtitle">Appointment Tracking System</p>
             </div>
             
             <?php if ($error): ?>
                 <div class="alert alert-danger">
-                    <span class="alert-icon">⚠️</span>
+                    <?= icon('alert') ?>
                     <div class="alert-content">
                         <div class="alert-message"><?= htmlspecialchars($error) ?></div>
                     </div>

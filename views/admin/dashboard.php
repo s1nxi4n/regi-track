@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_ADMIN);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
+require_once __DIR__ . '/../../includes/icon.php';
 
 $pageTitle = 'Dashboard';
 $currentPage = 'dashboard';
@@ -46,10 +47,10 @@ $futureCount = count($futureScheduled);
 $rescheduleCount = count($rescheduleRequests);
 
 $typeIcons = [
-    'tor' => '📄',
-    'diploma' => '🎓',
-    'request_rf' => '📋',
-    'certificate' => '✅'
+    'tor' => 'file-text',
+    'diploma' => 'graduation',
+    'request_rf' => 'clipboard',
+    'certificate' => 'check'
 ];
 
 $activeTab = $_GET['tab'] ?? 'today';
@@ -59,28 +60,28 @@ $activeTab = $_GET['tab'] ?? 'today';
 
 <div class="stats-grid">
     <a href="?tab=today" class="stat-card <?= $activeTab === 'today' ? 'active' : '' ?>" style="text-decoration:none;color:inherit;">
-        <div class="stat-icon primary">📅</div>
+        <div class="stat-icon primary"><?= icon('calendar') ?></div>
         <div class="stat-content">
             <div class="stat-label">Today's Appointments</div>
             <div class="stat-value"><?= $todayCount ?></div>
         </div>
     </a>
     <a href="?tab=pending" class="stat-card <?= $activeTab === 'pending' ? 'active' : '' ?>" style="text-decoration:none;color:inherit;">
-        <div class="stat-icon warning">⏳</div>
+        <div class="stat-icon warning"><?= icon('clock') ?></div>
         <div class="stat-content">
             <div class="stat-label">Pending Requests</div>
             <div class="stat-value"><?= $pendingCount ?></div>
         </div>
     </a>
     <a href="?tab=future" class="stat-card <?= $activeTab === 'future' ? 'active' : '' ?>" style="text-decoration:none;color:inherit;">
-        <div class="stat-icon success">📆</div>
+        <div class="stat-icon success"><?= icon('calendar-check') ?></div>
         <div class="stat-content">
             <div class="stat-label">Future Scheduled</div>
             <div class="stat-value"><?= $futureCount ?></div>
         </div>
     </a>
     <a href="?tab=reschedule" class="stat-card <?= $activeTab === 'reschedule' ? 'active' : '' ?>" style="text-decoration:none;color:inherit;">
-        <div class="stat-icon danger">🔄</div>
+        <div class="stat-icon danger"><?= icon('refresh') ?></div>
         <div class="stat-content">
             <div class="stat-label">Reschedule Requests</div>
             <div class="stat-value"><?= $rescheduleCount ?></div>

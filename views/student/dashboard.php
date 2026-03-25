@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_STUDENT);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
+require_once __DIR__ . '/../../includes/icon.php';
 
 $pageTitle = 'Dashboard';
 $currentPage = 'dashboard';
@@ -30,10 +31,10 @@ usort($activeAppointments, function($a, $b) use ($statusOrder) {
 });
 
 $typeIcons = [
-    'tor' => '📄',
-    'diploma' => '🎓',
-    'request_rf' => '📋',
-    'certificate' => '✅'
+    'tor' => 'file-text',
+    'diploma' => 'graduation',
+    'request_rf' => 'clipboard',
+    'certificate' => 'check'
 ];
 ?>
 
@@ -41,7 +42,7 @@ $typeIcons = [
 
 <?php if ($cancelError): ?>
     <div class="alert alert-danger">
-        <span class="alert-icon">⚠️</span>
+        <?= icon('alert') ?>
         <div class="alert-content">
             <div class="alert-message"><?= htmlspecialchars($cancelError) ?></div>
         </div>
@@ -54,14 +55,14 @@ $typeIcons = [
         <p class="text-muted mb-0">Manage your appointments</p>
     </div>
     <a href="create-appointment.php" class="btn btn-primary">
-        ➕ New Appointment
+        <?= icon('plus') ?> New Appointment
     </a>
 </div>
 
 <?php if (empty($activeAppointments)): ?>
     <div class="card">
         <div class="empty-state">
-            <div class="empty-icon">📋</div>
+            <div class="empty-icon"><?= icon('clipboard', 64) ?></div>
             <h3 class="empty-title">No Active Appointments</h3>
             <p class="empty-text">Create your first appointment to get started.</p>
             <a href="create-appointment.php" class="btn btn-primary">Create Appointment</a>
@@ -80,14 +81,14 @@ $typeIcons = [
             <?php foreach ($activeAppointments as $apt): ?>
                 <div class="appointment-item">
                     <div class="appointment-type-icon">
-                        <?= $typeIcons[$apt['type']] ?? '📋' ?>
+                        <?= isset($typeIcons[$apt['type']]) ? icon($typeIcons[$apt['type']]) : icon('clipboard') ?>
                     </div>
                     <div class="appointment-info">
                         <div class="appointment-type">
                             <?= htmlspecialchars($APPOINTMENT_TYPES[$apt['type']]['label'] ?? $apt['type']) ?>
                         </div>
                         <div class="appointment-meta">
-                            <span>📅 <?= htmlspecialchars($apt['date']) ?></span>
+                            <span><?= icon('calendar', 14) ?> <?= htmlspecialchars($apt['date']) ?></span>
                             <span class="status-badge status-<?= strtolower(str_replace(' ', '-', $apt['status'])) ?>">
                                 <?= htmlspecialchars($apt['status']) ?>
                             </span>

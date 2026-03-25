@@ -1,4 +1,5 @@
 <?php 
+require_once __DIR__ . '/icon.php';
 $currentPage = $currentPage ?? 'dashboard';
 $unreadCount = $unreadCount ?? 0;
 ?>
@@ -9,14 +10,14 @@ $unreadCount = $unreadCount ?? 0;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? 'RegiTrack') ?></title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c5cff' stroke-width='2'><path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/><rect x='8' y='2' width='8' height='4' rx='1' ry='1'/></svg>">
 </head>
 <body>
     <div class="app-layout">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <div class="sidebar-logo-icon">📋</div>
+                    <div class="sidebar-logo-icon"><?= icon('clipboard', 24) ?></div>
                     <span>RegiTrack</span>
                 </div>
             </div>
@@ -25,7 +26,7 @@ $unreadCount = $unreadCount ?? 0;
                 <div class="nav-section">
                     <div class="nav-section-title">Overview</div>
                     <a href="/views/admin/dashboard.php" class="nav-link <?= $currentPage === 'dashboard' ? 'active' : '' ?>">
-                        <span class="nav-link-icon">📊</span>
+                        <span class="nav-link-icon"><?= icon('dashboard') ?></span>
                         Dashboard
                     </a>
                 </div>
@@ -39,25 +40,25 @@ $unreadCount = $unreadCount ?? 0;
                     </div>
                     <div class="nav-section-items">
                         <a href="/views/admin/dashboard.php?tab=today" class="nav-link <?= ($currentPage === 'dashboard' && ($_GET['tab'] ?? '') === 'today') ? 'active' : '' ?>">
-                            <span class="nav-link-icon">📅</span>
+                            <span class="nav-link-icon"><?= icon('calendar') ?></span>
                             Today's Schedule
                             <?php if (!empty($todayCount)): ?>
                                 <span class="nav-badge"><?= $todayCount ?></span>
                             <?php endif; ?>
                         </a>
                         <a href="/views/admin/dashboard.php?tab=pending" class="nav-link <?= ($currentPage === 'dashboard' && ($_GET['tab'] ?? '') === 'pending') ? 'active' : '' ?>">
-                            <span class="nav-link-icon">⏳</span>
+                            <span class="nav-link-icon"><?= icon('clock') ?></span>
                             Pending
                             <?php if (!empty($pendingCount)): ?>
                                 <span class="nav-badge"><?= $pendingCount ?></span>
                             <?php endif; ?>
                         </a>
                         <a href="/views/admin/dashboard.php?tab=future" class="nav-link <?= ($currentPage === 'dashboard' && ($_GET['tab'] ?? '') === 'future') ? 'active' : '' ?>">
-                            <span class="nav-link-icon">📆</span>
+                            <span class="nav-link-icon"><?= icon('calendar-check') ?></span>
                             Future
                         </a>
                         <a href="/views/admin/dashboard.php?tab=reschedule" class="nav-link <?= ($currentPage === 'dashboard' && ($_GET['tab'] ?? '') === 'reschedule') ? 'active' : '' ?>">
-                            <span class="nav-link-icon">🔄</span>
+                            <span class="nav-link-icon"><?= icon('refresh') ?></span>
                             Reschedule
                             <?php if (!empty($rescheduleCount)): ?>
                                 <span class="nav-badge"><?= $rescheduleCount ?></span>
@@ -69,15 +70,15 @@ $unreadCount = $unreadCount ?? 0;
                 <div class="nav-section">
                     <div class="nav-section-title">Management</div>
                     <a href="/views/admin/add-student.php" class="nav-link <?= $currentPage === 'add-student' ? 'active' : '' ?>">
-                        <span class="nav-link-icon">👤</span>
+                        <span class="nav-link-icon"><?= icon('user') ?></span>
                         Add Student
                     </a>
                     <a href="/views/admin/history.php" class="nav-link <?= $currentPage === 'history' ? 'active' : '' ?>">
-                        <span class="nav-link-icon">📜</span>
+                        <span class="nav-link-icon"><?= icon('scroll') ?></span>
                         Activity Logs
                     </a>
                     <a href="/views/change-password.php" class="nav-link <?= $currentPage === 'password' ? 'active' : '' ?>">
-                        <span class="nav-link-icon">🔐</span>
+                        <span class="nav-link-icon"><?= icon('lock') ?></span>
                         Change Password
                     </a>
                 </div>

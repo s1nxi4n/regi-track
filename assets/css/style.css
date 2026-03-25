@@ -663,7 +663,7 @@ tr:hover td {
 }
 
 .alert-icon {
-  font-size: var(--text-lg);
+  flex-shrink: 0;
 }
 
 .alert-content {

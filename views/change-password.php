@@ -24,7 +24,10 @@ if ($isAdmin) {
 
 <?php if ($success): ?>
     <div class="alert alert-success mb-6">
-        <span class="alert-icon">✅</span>
+        <svg class="alert-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
         <div class="alert-content">
             <div class="alert-message"><?= htmlspecialchars($success) ?></div>
         </div>
@@ -33,18 +36,30 @@ if ($isAdmin) {
 
 <?php if ($error): ?>
     <div class="alert alert-danger mb-6">
-        <span class="alert-icon">⚠️</span>
+        <svg class="alert-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
         <div class="alert-content">
             <div class="alert-message"><?= htmlspecialchars($error) ?></div>
         </div>
     </div>
 <?php endif; ?>
 
-<div class="card" style="max-width: 500px;">
+<div class="card" style="max-width: 500px; <?= $isAdmin ? 'margin: 0 auto;' : '' ?>">
     <div class="card-header">
-        <div>
-            <h3 class="card-title">🔐 Change Password</h3>
-            <p class="card-subtitle">Update your account password</p>
+        <div class="flex items-center gap-3">
+            <div class="stat-icon" style="width:40px;height:40px;background:var(--accent-dim);color:var(--accent);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="card-title" style="margin-bottom:0;">Change Password</h3>
+                <p class="card-subtitle">Update your account password</p>
+            </div>
         </div>
     </div>
     

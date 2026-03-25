@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../includes/auth-check.php';
 requireOnceRole(ROLE_STUDENT);
 require_once __DIR__ . '/../../includes/firebase-helper.php';
+require_once __DIR__ . '/../../includes/icon.php';
 
 $pageTitle = 'New Appointment';
 $currentPage = 'create';
@@ -27,7 +28,7 @@ $today = date('Y-m-d');
     
     <?php if ($error): ?>
         <div class="alert alert-danger mb-6">
-            <span class="alert-icon">⚠️</span>
+            <?= icon('alert') ?>
             <div class="alert-content">
                 <div class="alert-message"><?= htmlspecialchars($error) ?></div>
             </div>
@@ -39,10 +40,10 @@ $today = date('Y-m-d');
             <label for="type" class="form-label required">Document Type</label>
             <select id="type" name="type" class="form-select" required>
                 <option value="">Select document type...</option>
-                <option value="tor">📄 Transcript of Records (TOR)</option>
-                <option value="diploma">🎓 Diploma</option>
-                <option value="request_rf">📋 Request RF</option>
-                <option value="certificate">✅ Certificate</option>
+                <option value="tor">Transcript of Records (TOR)</option>
+                <option value="diploma">Diploma</option>
+                <option value="request_rf">Request RF</option>
+                <option value="certificate">Certificate</option>
             </select>
         </div>
         

@@ -1,4 +1,5 @@
 <?php 
+require_once __DIR__ . '/icon.php';
 $currentPage = $currentPage ?? 'dashboard';
 $unreadCount = $unreadCount ?? 0;
 ?>
@@ -9,14 +10,14 @@ $unreadCount = $unreadCount ?? 0;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? 'RegiTrack') ?></title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c5cff' stroke-width='2'><path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/><rect x='8' y='2' width='8' height='4' rx='1' ry='1'/></svg>">
 </head>
 <body>
     <div class="app-layout">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <div class="sidebar-logo-icon">📋</div>
+                    <div class="sidebar-logo-icon"><?= icon('clipboard', 24) ?></div>
                     <span>RegiTrack</span>
                 </div>
             </div>
@@ -25,15 +26,15 @@ $unreadCount = $unreadCount ?? 0;
                 <div class="nav-section">
                     <div class="nav-section-title">Appointments</div>
                     <a href="/views/student/dashboard.php" class="nav-link <?= $currentPage === 'dashboard' ? 'active' : '' ?>">
-                        <span class="nav-link-icon">📊</span>
+                        <span class="nav-link-icon"><?= icon('dashboard') ?></span>
                         Dashboard
                     </a>
                     <a href="/views/student/create-appointment.php" class="nav-link <?= $currentPage === 'create' ? 'active' : '' ?>">
-                        <span class="nav-link-icon">➕</span>
+                        <span class="nav-link-icon"><?= icon('plus') ?></span>
                         New Appointment
                     </a>
                     <a href="/views/student/notifications.php" class="nav-link <?= $currentPage === 'notifications' ? 'active' : '' ?>">
-                        <span class="nav-link-icon">🔔</span>
+                        <span class="nav-link-icon"><?= icon('bell') ?></span>
                         Notifications
                         <?php if ($unreadCount > 0): ?>
                             <span class="nav-badge"><?= $unreadCount ?></span>
@@ -44,11 +45,11 @@ $unreadCount = $unreadCount ?? 0;
                 <div class="nav-section">
                     <div class="nav-section-title">Account</div>
                     <a href="/views/student/history.php" class="nav-link <?= $currentPage === 'history' ? 'active' : '' ?>">
-                        <span class="nav-link-icon">📜</span>
+                        <span class="nav-link-icon"><?= icon('scroll') ?></span>
                         History
                     </a>
                     <a href="/views/change-password.php" class="nav-link <?= $currentPage === 'password' ? 'active' : '' ?>">
-                        <span class="nav-link-icon">🔐</span>
+                        <span class="nav-link-icon"><?= icon('lock') ?></span>
                         Change Password
                     </a>
                 </div>
