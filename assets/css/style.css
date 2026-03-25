@@ -94,6 +94,20 @@ html {
   scroll-behavior: smooth;
 }
 
+.stat-card {
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.stat-card:hover {
+  border-color: var(--border-light);
+}
+
+.stat-card.active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--bg-primary);
@@ -186,6 +200,30 @@ a:hover { color: var(--accent-hover); }
   color: var(--text-muted);
   padding: var(--space-2) var(--space-3);
   margin-bottom: var(--space-2);
+}
+
+.nav-section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.nav-section-toggle:hover {
+  color: var(--text-secondary);
+}
+
+.nav-section-toggle .chevron {
+  transition: transform var(--transition);
+}
+
+.nav-section.collapsed .nav-section-items {
+  display: none;
+}
+
+.nav-section.collapsed .chevron {
+  transform: rotate(-90deg);
 }
 
 .nav-link {

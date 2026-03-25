@@ -23,19 +23,55 @@ $unreadCount = $unreadCount ?? 0;
             
             <nav class="sidebar-nav">
                 <div class="nav-section">
-                    <div class="nav-section-title">Main</div>
+                    <div class="nav-section-title">Overview</div>
                     <a href="/views/admin/dashboard.php" class="nav-link <?= $currentPage === 'dashboard' ? 'active' : '' ?>">
                         <span class="nav-link-icon">📊</span>
                         Dashboard
                     </a>
+                </div>
+                
+                <div class="nav-section collapsed" id="appointments-nav">
+                    <div class="nav-section-title nav-section-toggle" onclick="this.parentElement.classList.toggle('collapsed'); localStorage.setItem('appointmentsNav', this.parentElement.classList.contains('collapsed') ? 'collapsed' : 'expanded');">
+                        <span>Appointments</span>
+                        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="nav-section-items">
+                        <a href="/views/admin/dashboard.php?tab=today" class="nav-link <?= ($currentPage === 'dashboard' && ($_GET['tab'] ?? '') === 'today') ? 'active' : '' ?>">
+                            <span class="nav-link-icon">📅</span>
+                            Today's Schedule
+                            <?php if (!empty($todayCount)): ?>
+                                <span class="nav-badge"><?= $todayCount ?></span>
+                            <?php endif; ?>
+                        </a>
+                        <a href="/views/admin/dashboard.php?tab=pending" class="nav-link <?= ($currentPage === 'dashboard' && ($_GET['tab'] ?? '') === 'pending') ? 'active' : '' ?>">
+                            <span class="nav-link-icon">⏳</span>
+                            Pending
+                            <?php if (!empty($pendingCount)): ?>
+                                <span class="nav-badge"><?= $pendingCount ?></span>
+                            <?php endif; ?>
+                        </a>
+                        <a href="/views/admin/dashboard.php?tab=future" class="nav-link <?= ($currentPage === 'dashboard' && ($_GET['tab'] ?? '') === 'future') ? 'active' : '' ?>">
+                            <span class="nav-link-icon">📆</span>
+                            Future
+                        </a>
+                        <a href="/views/admin/dashboard.php?tab=reschedule" class="nav-link <?= ($currentPage === 'dashboard' && ($_GET['tab'] ?? '') === 'reschedule') ? 'active' : '' ?>">
+                            <span class="nav-link-icon">🔄</span>
+                            Reschedule
+                            <?php if (!empty($rescheduleCount)): ?>
+                                <span class="nav-badge"><?= $rescheduleCount ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
                     <a href="/views/admin/add-student.php" class="nav-link <?= $currentPage === 'add-student' ? 'active' : '' ?>">
                         <span class="nav-link-icon">👤</span>
                         Add Student
                     </a>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="nav-section-title">System</div>
                     <a href="/views/admin/history.php" class="nav-link <?= $currentPage === 'history' ? 'active' : '' ?>">
                         <span class="nav-link-icon">📜</span>
                         Activity Logs
