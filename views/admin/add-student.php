@@ -86,26 +86,4 @@ unset($_SESSION['add_student_error'], $_SESSION['add_student_success']);
     </form>
 </div>
 
-<div class="card mt-6">
-    <div class="card-header">
-        <h3 class="card-title">Quick Reference</h3>
-    </div>
-    <div class="table-container">
-        <table>
-            <tr>
-                <th>Default Password</th>
-                <td><code class="font-mono">1</code> (student must change on first login)</td>
-            </tr>
-            <tr>
-                <th>Login Format (Student ID)</th>
-                <td><code class="font-mono">23-1234-567890</code></td>
-            </tr>
-            <tr>
-                <th>Login Format (Email)</th>
-                <td><code class="font-mono">juan.cruz.ui@phinmaed.com</code></td>
-            </tr>
-        </table>
-    </div>
-</div>
-
 <?php include_once __DIR__ . '/../../includes/layout-end.php'; ?>
