@@ -101,7 +101,8 @@ $APPOINTMENT_TYPES = [
 |------|---------|
 | `icon.php` | SVG icon helper function |
 | `firebase-helper.php` | All Firebase CRUD operations |
-| `auth-check.php` | Session and role verification |
+| `session.php` | Secure session management (timeout, fixation prevention, safe redirects) |
+| `auth-check.php` | Simple wrapper for session.php functions |
 | `layout-admin.php` | Admin layout template (sidebar, header) |
 | `layout-student.php` | Student layout template (sidebar, header) |
 | `layout-end.php` | Closing tags for layouts |
@@ -246,35 +247,67 @@ createAdminLog($data)           // POST /admin_logs.json
 - Called by all action files for database operations
 - Called by view files for data retrieval
 
-### 3.3 Authentication Module (`includes/auth-check.php`)
+### 3.3 Session Module (`includes/session.php`)
 
-**Purpose:** Session and role verification
+**Purpose:** Secure session management with timeout and fixation prevention
 
 **Key Functions:**
 ```php
-sessionStart()                   // Start PHP session if not active
-isLoggedIn()                    // Check if user session exists
-requireOnceRole($requiredRole) // Verify user has correct role, redirect if not
+startSession()                  // Start PHP session with secure cookie settings
+regenerateSession()             // Create new session ID (prevents hijacking)
+destroySession()               // Completely wipe session
+createUserSession($id, $role, $name)  // Create session after login
+isLoggedIn()                   // Check if user_id is set
+isSessionValid($timeout = 1800) // Check if session hasn't expired (30 min)
+updateActivity()               // Update last_activity timestamp
+requireLogin()                  // Redirect to login if not authenticated
+requireRole($role)             // Redirect to own dashboard if wrong role
+getSafeRedirect($default)      // Prevent open redirect attacks
+setRedirect($url)              // Store redirect URL safely
 ```
 
 **Session Structure:**
 ```php
 $_SESSION = [
-    'student_id' => 'admin' | '23-xxxx-xxxxxx',  // User identifier
+    'user_id' => 'admin' | '23-xxxx-xxxxxx',     // User identifier
+    'student_id' => 'admin' | '23-xxxx-xxxxxx',  // Backward compatibility
     'role' => 'admin' | 'student',                // User role
-    'full_name' => 'Administrator' | 'Juan Dela Cruz'  // Display name
+    'full_name' => 'Administrator' | 'Juan Dela Cruz',  // Display name
+    'login_time' => 1234567890,                   // When user logged in
+    'last_activity' => 1234567890                  // Last activity timestamp
 ]
 ```
+
+**Security Features:**
+- Session timeout: 30 minutes of inactivity
+- Session fixation prevention: ID regenerated on login/logout
+- Secure cookies: HttpOnly, Lax same-site policy
+- Open redirect protection: Only whitelisted redirect URLs allowed
 
 **Dependencies:**
 - PHP session functions
 - Constants module (for roles)
 
 **Relationships:**
-- Used by all protected view pages
-- Used by action files for verification
+- Used by auth-check.php for authentication
+- Used by all protected view pages and action files
 
-### 3.4 Layout Modules (`includes/layout-*.php`)
+### 3.4 Auth-Check Module (`includes/auth-check.php`)
+
+**Purpose:** Simple wrapper around session.php for easy use
+
+**Key Functions:**
+```php
+requireAuth()       // Alias for requireLogin()
+requireOnceRole($role)  // Alias for requireRole()
+getCurrentUser()    // Get user info from session
+```
+
+**Note:** This file just wraps `session.php` for simpler syntax in view files.
+
+---
+
+### 3.5 Layout Modules (`includes/layout-*.php`)
 
 **Purpose:** Reusable page templates with consistent sidebar navigation
 
@@ -303,7 +336,7 @@ $_SESSION = [
 - Includes JavaScript
 - Closes body and html tags
 
-### 3.5 Icon Module (`includes/icon.php`)
+### 3.6 Icon Module (`includes/icon.php`)
 
 **Purpose:** SVG icon system for consistent UI
 
@@ -410,7 +443,76 @@ function requireOnceRole($requiredRole) {
 }
 ```
 
-### 4.3 Login Action (`actions/auth/login.php`)
+### 4.3 Session Functions (`includes/session.php`)
+
+**Function:** `startSession()`
+
+| Aspect | Details |
+|--------|---------|
+| **Inputs** | None |
+| **Process** | Configure secure cookie params, start PHP session |
+| **Output** | Session started |
+| **Security** | Sets HttpOnly, Lax same-site, no lifetime (browser close) |
+
+```php
+function startSession() {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => false,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    session_start();
+}
+```
+
+**Function:** `createUserSession($userId, $role, $fullName)`
+
+| Aspect | Details |
+|--------|---------|
+| **Inputs** | `$userId`, `$role`, `$fullName` |
+| **Process** | Regenerate session ID, set session variables |
+| **Output** | Session created |
+| **Security** | Calls `regenerateSession()` to prevent fixation |
+
+**Function:** `isSessionValid($timeout = 1800)`
+
+| Aspect | Details |
+|--------|---------|
+| **Inputs** | `$timeout` in seconds (default 30 min) |
+| **Process** | Check if last_activity exists and hasn't expired |
+| **Output** | Boolean |
+| **Side Effects** | None |
+
+```php
+function isSessionValid($timeout = 1800) {
+    if (!isset($_SESSION['last_activity'])) {
+        return false;
+    }
+    $elapsed = time() - $_SESSION['last_activity'];
+    return $elapsed < $timeout;
+}
+```
+
+**Function:** `getSafeRedirect($default)`
+
+| Aspect | Details |
+|--------|---------|
+| **Inputs** | `$default` - fallback URL if redirect is invalid |
+| **Process** | Validate and whitelist redirect URLs |
+| **Output** | Safe redirect URL |
+| **Security** | Prevents open redirect attacks |
+
+Allowed redirects:
+- `/views/student/dashboard.php`
+- `/views/admin/dashboard.php`
+- `/views/change-password.php`
+
+---
+
+### 4.4 Login Action (`actions/auth/login.php`)
 
 **Process Flow:**
 
@@ -465,7 +567,7 @@ function requireOnceRole($requiredRole) {
               └─► Set error → redirect to /views/login.php
 ```
 
-### 4.4 Create Appointment Action (`actions/student/create-appointment.php`)
+### 4.5 Create Appointment Action (`actions/student/create-appointment.php`)
 
 **Process Flow:**
 
@@ -500,7 +602,7 @@ function requireOnceRole($requiredRole) {
        └─► Set error → redirect to /views/student/create-appointment.php
 ```
 
-### 4.5 Admin Accept Appointment (`actions/admin/accept-appointment.php`)
+### 4.6 Admin Accept Appointment (`actions/admin/accept-appointment.php`)
 
 **Process Flow:**
 
@@ -538,7 +640,7 @@ function requireOnceRole($requiredRole) {
    ├─► Redirect to /views/admin/dashboard.php
 ```
 
-### 4.6 Dynamic Form Fields (Student Create/Edit)
+### 4.7 Dynamic Form Fields (Student Create/Edit)
 
 **JavaScript in `views/student/create-appointment.php` and `edit-appointment.php`:**
 
@@ -583,6 +685,32 @@ typeSelect.addEventListener('change', function() {
 │                      SESSION STATE                              │
 ├─────────────────────────────────────────────────────────────────┤
 │ $_SESSION = {                                                  │
+│     'user_id' => 'admin' | '23-xxxx-xxxxxx',                  │
+│     'student_id' => 'admin' | '23-xxxx-xxxxxx', (backward compat)
+│     'role' => 'admin' | 'student',                            │
+│     'full_name' => 'Administrator' | 'Juan Dela Cruz',       │
+│     'login_time' => 1234567890,                               │
+│     'last_activity' => 1234567890                             │
+│ }                                                              │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+          ┌────────────────────┼────────────────────┐
+          ▼                    ▼                    ▼
+     ┌──────────┐        ┌──────────┐         ┌──────────┐
+     │ Session  │        │  Views  │         │ Actions  │
+     │  (PHP)   │        │         │         │          │
+     │          │        │         │         │ Process  │
+     │ isLogged │        │ Layout  │         │ Form     │
+     │In()      │        │ Choice  │         │ Data     │
+     │          │        │         │         │          │
+     │ require  │        │         │         │          │
+     │Login()   │        │         │         │          │
+     └──────────┘        └──────────┘         └──────────┘
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      SESSION STATE                              │
+├─────────────────────────────────────────────────────────────────┤
+│ $_SESSION = {                                                  │
 │     'student_id' => 'admin' | '23-xxxx-xxxxxx',               │
 │     'role' => 'admin' | 'student',                            │
 │     'full_name' => 'Administrator' | 'Juan Dela Cruz'         │
@@ -613,6 +741,11 @@ typeSelect.addEventListener('change', function() {
 │  User       │              │  index.php  │               │             │
 │  clicks     │              │      │      │               │             │
 │  form       │              │      ▼      │               │             │
+│             │              │  session.php│               │             │
+│             │              │  (start,    │               │             │
+│             │              │   validate) │               │             │
+│             │              │      │      │               │             │
+│             │              │      ▼      │               │             │
 │             │              │  auth-      │               │             │
 │             │              │  check.php  │               │             │
 │             │              │      │      │               │             │
@@ -719,27 +852,76 @@ PHP Action (POST handler)
 
 ```
 http://localhost:8000/
-         │
-         ▼
+          │
+          ▼
 ┌─────────────────────┐
 │     index.php       │
 │                     │
 │ require constants   │
-│ require auth-check │
+│ require session.php │
+│ startSession()      │
 │                     │
-│ if !isLoggedIn():   │
+│ if loggedIn & valid│
+│   redirect to own  │
+│   dashboard        │
+│                     │
+│ if !loggedIn:       │
 │   redirect /login  │
 │                     │
-│ if role == admin:   │
-│   redirect /admin  │
-│                     │
-│ else:               │
-│   redirect /student│
+│ (404 handled for   │
+│  non-existing URLs)│
 └─────────────────────┘
 ```
 
 ### 6.2 Student Login Flow
 
+```
+http://localhost:8000/views/login.php
+          │
+          ▼
+┌─────────────────────┐
+│    views/login.php  │
+│                     │
+│ require constants   │
+│ require auth-check  │ → requires session.php
+│ require icon        │
+│                     │
+│ if isLoggedIn():    │
+│   redirect to      │
+│   appropriate      │
+│   dashboard        │
+│                     │
+│ Show login form     │
+└─────────────────────┘
+          │
+          │ POST
+          ▼
+┌─────────────────────┐
+│ actions/auth/login │
+│                     │
+│ startSession()      │ ← secure cookie settings
+│                     │
+│ Validate inputs     │
+│                     │
+│ Check admin flag    │
+│                     │
+├─► If admin_login:   │
+│   Check not student│
+│   ID/email format   │
+│   Verify admin     │
+│   createUserSession│ → regenerates ID
+│   getSafeRedirect  │ → validates redirect
+│   Redirect admin   │
+│                     │
+├─► Else (student):   │
+│   Check not 'admin'│
+│   Look up user     │
+│   Verify password  │
+│   Check first login│
+│   createUserSession│ → regenerates ID
+│   getSafeRedirect  │ → validates redirect
+│   Redirect student │
+└─────────────────────┘
 ```
 http://localhost:8000/views/login.php
          │
@@ -792,19 +974,22 @@ http://localhost:8000/views/login.php
 
 ```
 http://localhost:8000/views/admin/dashboard.php
-         │
-         ▼
+          │
+          ▼
 ┌─────────────────────┐
 │  admin/dashboard   │
 │                     │
 │ require constants   │
-│ require auth-check  │
-│ requireOnceRole    │
+│ require auth-check  │ → requires session.php
+│ requireOnceRole    │ → calls requireLogin()
 │ (ROLE_ADMIN)       │
 │                     │
 │ if !isLoggedIn()   │
-│   OR role != admin:│
+│   OR !validSession:│
+│   destroySession() │
 │   redirect /login  │
+│                     │
+│ updateActivity()   │ → refresh timeout
 │                     │
 │ Get data from      │
 │ Firebase           │
@@ -818,24 +1003,25 @@ http://localhost:8000/views/admin/dashboard.php
 
 ```
 User fills form → Clicks submit
-         │
-         ▼
+          │
+          ▼
 POST to action file
-         │
-         ▼
+          │
+          ▼
 Action processes:
-  1. Start session
-  2. Validate input
-  3. Call Firebase helper
-  4. Create/Update data
-  5. Create notifications (if needed)
-  6. Create admin log (if admin)
-  7. Redirect to next page
-         │
-         ▼
+  1. startSession() - secure cookie settings
+  2. requireLogin() - check auth + timeout
+  3. Validate input
+  4. Call Firebase helper
+  5. Create/Update data
+  6. Create notifications (if needed)
+  7. Create admin log (if admin)
+  8. Redirect to next page
+          │
+          ▼
 Browser receives redirect
-         │
-         ▼
+          │
+          ▼
 New page loads with updated data
 ```
 
@@ -887,5 +1073,16 @@ This completes the exhaustive analysis of the RegiTrack codebase. The system is 
 - **No frameworks** - Pure PHP demonstrating fundamental web development
 - **Role-based access** - Separate flows for students and admins
 - **Complete CRUD** - All database operations via Firebase helper
+- **Secure sessions** - Session timeout (30 min), fixation prevention, open redirect protection
+
+### Security Features
+
+| Feature | Implementation |
+|---------|---------------|
+| Session timeout | 30 minutes of inactivity via `isSessionValid()` |
+| Session fixation | ID regenerated on login/logout via `regenerateSession()` |
+| Secure cookies | HttpOnly, Lax same-site policy via `session_set_cookie_params()` |
+| Open redirect protection | Only whitelisted URLs allowed via `getSafeRedirect()` |
+| Auth check | All pages use `requireLogin()` or `requireRole()` |
 
 Use this document as a reference to understand any part of the system's implementation.

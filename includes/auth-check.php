@@ -1,28 +1,14 @@
 <?php
 
-session_start();
+require_once __DIR__ . '/session.php';
+startSession();
 
 function requireAuth() {
-    if (!isset($_SESSION['student_id'])) {
-        header('Location: ../views/login.php');
-        exit;
-    }
-}
-
-function requireRole($role) {
-    requireAuth();
-    if ($_SESSION['role'] !== $role) {
-        header('Location: ../index.php');
-        exit;
-    }
+    requireLogin();
 }
 
 function requireOnceRole($role) {
     requireRole($role);
-}
-
-function isLoggedIn() {
-    return isset($_SESSION['student_id']);
 }
 
 function getCurrentUser() {
@@ -30,7 +16,8 @@ function getCurrentUser() {
         return null;
     }
     return [
-        'student_id' => $_SESSION['student_id'],
-        'role' => $_SESSION['role']
+        'student_id' => $_SESSION['user_id'],
+        'role' => $_SESSION['role'],
+        'full_name' => $_SESSION['full_name']
     ];
 }

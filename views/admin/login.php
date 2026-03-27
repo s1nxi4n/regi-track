@@ -72,9 +72,6 @@ unset($_SESSION['login_error']);
                 </button>
             </form>
             
-            <p class="text-center mt-6">
-                <a href="/login" class="text-sm">Switch to Student Login</a>
-            </p>
         </div>
     </div>
 </body>

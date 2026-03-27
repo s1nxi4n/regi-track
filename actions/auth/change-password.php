@@ -2,10 +2,13 @@
 
 require_once __DIR__ . '/../../includes/firebase-helper.php';
 require_once __DIR__ . '/../../config/constants.php';
+require_once __DIR__ . '/../../includes/session.php';
 
-session_start();
+startSession();
+requireLogin(); // Make sure user is logged in
 
-$studentId = $_SESSION['student_id'] ?? '';
+$studentId = $_SESSION['user_id'] ?? '';
+$role = $_SESSION['role'] ?? '';
 $newPassword = $_POST['new_password'] ?? '';
 $confirmPassword = $_POST['confirm_password'] ?? '';
 
@@ -35,7 +38,7 @@ updateUser($studentId, [
 
 $_SESSION['password_success'] = 'Password changed successfully.';
 
-if ($_SESSION['role'] === ROLE_ADMIN) {
+if ($role === ROLE_ADMIN) {
     header('Location: ../../views/admin/dashboard.php');
 } else {
     header('Location: ../../views/student/dashboard.php');

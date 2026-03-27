@@ -2,8 +2,9 @@
 
 require_once __DIR__ . '/../../includes/firebase-helper.php';
 require_once __DIR__ . '/../../config/constants.php';
+require_once __DIR__ . '/../../includes/session.php';
 
-session_start();
+startSession();
 
 $isAdminLogin = isset($_POST['admin_login']);
 $password = $_POST['password'] ?? '';
@@ -17,6 +18,7 @@ if ($isAdminLogin) {
         exit;
     }
     
+    // Prevent student from logging in as admin
     if (strpos($username, '@') !== false || preg_match('/^\d{2}-\d{4}-\d{6}$/', $username)) {
         $_SESSION['login_error'] = 'Student login not allowed here. Use student portal.';
         header('Location: ../../views/admin/login.php');
@@ -25,10 +27,11 @@ if ($isAdminLogin) {
     
     $user = getUser('admin');
     if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['student_id'] = 'admin';
-        $_SESSION['role'] = ROLE_ADMIN;
-        $_SESSION['full_name'] = $user['full_name'] ?? 'Administrator';
-        header('Location: ../../views/admin/dashboard.php');
+        // Create session - this handles regeneration automatically
+        createUserSession('admin', ROLE_ADMIN, $user['full_name'] ?? 'Administrator');
+        
+        $redirect = getSafeRedirect('/views/admin/dashboard.php');
+        header('Location: ' . $redirect);
         exit;
     }
     
@@ -37,6 +40,7 @@ if ($isAdminLogin) {
     exit;
 }
 
+// Student login
 $loginInput = trim($_POST['student_id'] ?? '');
 
 if (empty($loginInput) || empty($password)) {
@@ -45,6 +49,7 @@ if (empty($loginInput) || empty($password)) {
     exit;
 }
 
+// Prevent admin from logging in as student
 if (strtolower($loginInput) === 'admin') {
     $_SESSION['login_error'] = 'Admin login not allowed here. Use admin portal.';
     header('Location: ../../views/login.php');
@@ -65,16 +70,16 @@ if (strpos($loginInput, '@') !== false) {
 }
 
 if ($user && password_verify($password, $user['password'])) {
-    $_SESSION['student_id'] = $studentId;
-    $_SESSION['role'] = $user['role'];
-    $_SESSION['full_name'] = $user['full_name'] ?? $studentId;
+    // Create session - this handles regeneration automatically
+    createUserSession($studentId, $user['role'], $user['full_name'] ?? $studentId);
     
     if ($user['is_first_login']) {
         header('Location: ../../views/change-password.php');
         exit;
     }
     
-    header('Location: ../../views/student/dashboard.php');
+    $redirect = getSafeRedirect('/views/student/dashboard.php');
+    header('Location: ' . $redirect);
     exit;
 }
 

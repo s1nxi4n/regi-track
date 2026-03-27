@@ -71,9 +71,6 @@ unset($_SESSION['login_error']);
                 </button>
             </form>
             
-            <p class="text-center mt-6">
-                <a href="/admin" class="text-sm">Admin Login</a>
-            </p>
         </div>
     </div>
 </body>
